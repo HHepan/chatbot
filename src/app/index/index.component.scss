@@ -28,7 +28,7 @@
   color: #333;
 }
 
-/* 顶部卡片头部的背景颜色（深橙色） */
+/* 顶部卡片头部的背景颜色（深蓝色） */
 .card-header {
   background-color: #3a3f58; /* 深蓝色 */
   color: white;
@@ -49,7 +49,7 @@
 }
 
 /* 发送消息输入框背景颜色 */
-.input-group input {
+.input-group textarea {
   border: 1px solid #56C596; /* 边框颜色与按钮相匹配 */
   background-color: #ffffff; /* 白色背景 */
   border-radius: 25px; /* 圆角输入框 */
@@ -57,6 +57,33 @@
   color: #333;
 }
 
+.input-group canvas {
+  border: 1px solid #56C596; /* 边框颜色与按钮相匹配 */
+  background-color: #ffffff; /* 白色背景 */
+  border-radius: 25px; /* 圆角输入框 */
+  padding-left: 15px;
+  color: #333;
+}
+
+/* 对textarea进行特殊设置 */
+textarea.form-control {
+  min-height: 40px; /* 设置最小高度 */
+  max-height: 500px; /* 设置最大高度 */
+  height: auto; /* 高度根据内容自适应 */
+  resize: none; /* 禁用手动调整大小 */
+  padding: 10px; /* 内边距 */
+}
+
+/* 对textarea进行特殊设置 */
+canvas.form-control {
+  min-height: 40px; /* 设置最小高度 */
+  max-height: 500px; /* 设置最大高度 */
+  height: auto; /* 高度根据内容自适应 */
+  resize: none; /* 禁用手动调整大小 */
+  padding: 10px; /* 内边距 */
+}
+
+/* 发送按钮的圆角效果 */
 .input-group button {
   background-color: #56C596; /* 清新绿色按钮 */
   border: none;
@@ -70,7 +97,13 @@
 }
 
 /* 发送按钮的圆角效果 */
-.input-group button:focus, .input-group input:focus {
+.input-group button:focus, .input-group input:focus, .input-group textarea:focus {
   outline: none;
   box-shadow: 0 0 5px rgba(86, 197, 150, 0.6); /* 聚焦时的光环 */
+}
+
+#waveform {
+  border: 1px solid #56C596;
+  background-color: #ffffff;
+  height: 93.5px; /* 控制波形图的高度 */
 }
