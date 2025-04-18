@@ -1,0 +1,84 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body {
+  margin: 0;
+  padding: 0;
+
+  height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* CAN (MUST) BE REMOVED ! Sample Global style */
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  //background: url(./assets/example/login.jpg) no-repeat center fixed;
+  -webkit-background-size: cover; /* pour anciens Chrome et Safari */
+  background-size: cover; /* version standardisée */
+
+  .title {
+    color: white;
+    margin: 0;
+    padding: 50px 20px;
+  }
+
+  a {
+    color: #fff !important;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: #ed3330;
+    padding: 20px;
+    border-radius: 5px;
+    display: inline-block;
+    border: none;
+    transition: all 0.4s ease 0s;
+
+    &:hover {
+      background: #fff;
+      color: #ed3330 !important;
+      letter-spacing: 1px;
+      -webkit-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+      -moz-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+      box-shadow: 5px 40px -10px rgba(0,0,0,0.57);
+      transition: all 0.4s ease 0s;
+    }
+  }
+}
+
+.form-co {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--bs-body-color);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: var(--bs-body-bg);
+  background-clip: padding-box;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+label {
+  text-align: right !important;
+}
+
+div.mat-mdc-dialog-surface.mdc-dialog__surface {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: 100%;
+  pointer-events: auto;
+  overflow-y: unset;
+}
+
+
+

@@ -1,0 +1,21 @@
+{
+  "name": "angular-electron",
+  "description": "Angular Electron sample",
+  "author": {
+    "name": "Maxime GRIS",
+    "email": "maxime.gris@gmail.com"
+  },
+  "version": "13.0.0",
+  "main": "main.js",
+  "private": true,
+  "dependencies": {
+    "better-sqlite3": "8.7.0",
+    "install": "^0.13.0",
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "0.3.17"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "electron-rebuild": "^3.2.9"
+  }
+}
