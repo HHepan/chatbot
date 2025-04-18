@@ -1,0 +1,76 @@
+/* 设置聊天卡片的高度为视口高度 */
+.chat-card {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff; /* 设置卡片的背景为白色 */
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 设置消息区域为可滚动，确保不会随着消息增加而超出 */
+.chat-body {
+  flex-grow: 1;
+  overflow-y: auto; /* 使得内容区域可以滚动 */
+  padding: 1rem;
+  max-height: calc(100vh - 140px); /* 留出足够空间给发送区域 */
+}
+
+/* 用户发送的消息背景颜色（浅绿色） */
+.chat-body .bg-green {
+  background-color: #A8E6CF; /* 浅绿色 */
+  color: #fff;
+}
+
+/* 机器人回复的消息背景颜色（浅灰色或米色） */
+.chat-body .bg-light {
+  background-color: #F5F5F5; /* 浅灰色 */
+  color: #333;
+}
+
+/* 顶部卡片头部的背景颜色（深橙色） */
+.card-header {
+  background-color: #3a3f58; /* 深蓝色 */
+  color: white;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  padding: 0.8rem;
+}
+
+/* 底部发送消息区域 */
+.chat-footer {
+  position: sticky;
+  bottom: 0;
+  background-color: #F5F5F5; /* 米色 */
+  z-index: 1; /* 确保发送区在消息区域之上 */
+  padding: 10px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* 发送消息输入框背景颜色 */
+.input-group input {
+  border: 1px solid #56C596; /* 边框颜色与按钮相匹配 */
+  background-color: #ffffff; /* 白色背景 */
+  border-radius: 25px; /* 圆角输入框 */
+  padding-left: 15px;
+  color: #333;
+}
+
+.input-group button {
+  background-color: #56C596; /* 清新绿色按钮 */
+  border: none;
+  color: #fff;
+  border-radius: 25px;
+}
+
+.input-group button:hover {
+  background-color: #4CAF50; /* 按钮悬停时的颜色（稍深绿色） */
+  cursor: pointer;
+}
+
+/* 发送按钮的圆角效果 */
+.input-group button:focus, .input-group input:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(86, 197, 150, 0.6); /* 聚焦时的光环 */
+}

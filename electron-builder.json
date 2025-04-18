@@ -1,0 +1,36 @@
+{
+  "asar": true,
+  "productName": "CS-project-demo",
+  "directories": {
+    "output": "release/"
+  },
+  "files": [
+    "**/*",
+    "!**/*.ts",
+    "!*.map",
+    "!package.json",
+    "!package-lock.json",
+    {
+      "from": "../dist",
+      "filter": ["**/*"]
+    }
+  ],
+  "win": {
+    "icon": "dist/assets/icons/node_record.ico",
+    "target": [
+      "portable"
+    ]
+  },
+  "mac": {
+    "icon": "dist/assets/icons",
+    "target": [
+      "dmg"
+    ]
+  },
+  "linux": {
+    "icon": "dist/assets/icons",
+    "target": [
+      "AppImage"
+    ]
+  }
+}
