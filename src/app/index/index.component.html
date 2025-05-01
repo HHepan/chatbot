@@ -35,7 +35,7 @@
 
     <!-- 根据模式显示不同的 UI -->
     <div *ngIf="mode === 'text'" class="input-group">
-      <textarea [(ngModel)]="message" class="form-control" rows="3" placeholder="Type your message..." (keydown.enter)="sendMessage()"></textarea>
+      <textarea [(ngModel)]="message" class="form-control" rows="3" placeholder="Type your message..."></textarea>
       <button class="btn" (click)="sendMessage()">发送</button>
     </div>
 

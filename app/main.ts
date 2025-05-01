@@ -6,6 +6,7 @@ import {AppDataSource} from "./data-source";
 import {EventsCenter} from "./events.center";
 import {MainService} from "./main.service";
 import {ItemRepository} from "./repository/item.repository";
+import {BaiduApiService} from "./services/baidu-api.service";
 let win: BrowserWindow | null = null;
 const eventsCenter = new EventsCenter();
 const args = process.argv.slice(1),
@@ -17,6 +18,10 @@ function createWindow(): BrowserWindow {
     console.log(AppDataSource.isInitialized);
     // 实例化加载事件
     new ItemRepository(eventsCenter);
+
+    // 实例化百度api服务
+    new BaiduApiService(eventsCenter);
+
     eventsCenter.handleAll();
   })
 
@@ -83,23 +88,6 @@ try {
         }
       }
     })
-    const size = screen.getPrimaryDisplay().workAreaSize;
-    ipcMain.handle('login-success', () => {
-      console.log('ipcMain login-success')
-      // win?.setSize(size.width * (7 / 8), size.height * (7 / 8));
-      win?.setSize(1300, 800);
-      // 获取屏幕的大小
-      const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-
-      let widthAndHeight = win?.getSize();
-      if (!widthAndHeight) {widthAndHeight = [0, 0]}
-      // 计算窗口的 x 和 y 坐标使其位于屏幕正中央
-      const x = (width - widthAndHeight[0]) / 2;
-      const y = (height - widthAndHeight[1]) / 2;
-
-      // 使用setPosition()方法将窗口定位到计算后的 x 和 y 坐标
-      win?.setPosition(x, y);
-    });
   });
 
   // Quit when all windows are closed.
@@ -108,14 +96,6 @@ try {
     // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') {
       app.quit();
-    }
-  });
-
-  app.on('activate', () => {
-    // On OS X it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (win === null) {
-      createWindow();
     }
   });
 
