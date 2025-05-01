@@ -1,4 +1,5 @@
 import {AfterViewChecked, Component, ViewChild } from '@angular/core';
+import {BaiduApiService} from "../../services/baidu-api.service";
 
 @Component({
   selector: 'app-index',
@@ -12,9 +13,18 @@ export class IndexComponent implements AfterViewChecked {
     { text: 'Hello, how can I assist you today?', sender: 'bot' }
   ];
   mode: 'text' | 'audio' = 'text'; // Default to 'text' mode
+  recording = false;
+  stream: MediaStream | null = null;
+  audioContext: AudioContext | null = null;
+  analyser: AnalyserNode | null = null;
+  dataArray: Uint8Array | null = null;
+  canvas: HTMLCanvasElement | null = null;
+  canvasContext: CanvasRenderingContext2D | null = null;
+
+  constructor(private baiduApiService: BaiduApiService) {
+  }
 
   sendMessage() {
-    console.log('Sending message');
     if (this.message.trim()) {
       this.messages.push({ text: this.message, sender: 'user' });
       this.message = '';
@@ -44,44 +54,29 @@ export class IndexComponent implements AfterViewChecked {
     this.mode = mode;
   }
 
-
-  /*----------------------------------------------------------------------------------------------*/
-  recording = false;
-  stream: MediaStream | null = null;
-  audioContext: AudioContext | null = null;
-  analyser: AnalyserNode | null = null;
-  dataArray: Uint8Array | null = null;
-  canvas: HTMLCanvasElement | null = null;
-  canvasContext: CanvasRenderingContext2D | null = null;
-
   startMic() {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => {
-        this.stream = stream;
-        this.recording = true;
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      this.stream = stream;
+      this.recording = true;
 
-        // Initialize the AudioContext and AnalyserNode
-        this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        this.analyser = this.audioContext.createAnalyser();
-        this.analyser.fftSize = 256;  // Choose FFT size for frequency analysis
-        this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      this.analyser = this.audioContext.createAnalyser();
+      this.analyser.fftSize = 256;  // Choose FFT size for frequency analysis
+      this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
 
-        // Create a MediaStreamAudioSourceNode
-        const source = this.audioContext.createMediaStreamSource(stream);
-        source.connect(this.analyser);
+      const source = this.audioContext.createMediaStreamSource(stream);
+      source.connect(this.analyser);
 
-        // Set up the canvas for waveform drawing
-        this.canvas = document.getElementById('waveform') as HTMLCanvasElement;
-        this.canvasContext = this.canvas.getContext('2d')!;
+      this.canvas = document.getElementById('waveform') as HTMLCanvasElement;
+      this.canvasContext = this.canvas.getContext('2d')!;
 
-        // Start the drawing loop
-        this.drawWaveform();
+      this.drawWaveform();
 
-        console.log('🎙️ 麦克风已启动', stream);
-      })
-      .catch(err => {
-        console.error('🚫 无法访问麦克风:', err);
-      });
+      console.log('🎙️ 麦克风已启动', stream);
+      this.baiduApiService.speechRecognitionApi();
+    }).catch(err => {
+      console.error('🚫 无法访问麦克风:', err);
+    });
   }
 
   stopMic() {
@@ -89,23 +84,18 @@ export class IndexComponent implements AfterViewChecked {
     this.recording = false;
     console.log('🛑 麦克风已关闭');
 
-    // Stop the audio context and waveform drawing
     if (this.audioContext) {
       this.audioContext.close();
     }
   }
 
-  // Function to draw waveform continuously
   drawWaveform() {
     if (!this.analyser || !this.canvasContext || !this.dataArray) return;
 
-    // Clear the previous frame
     this.canvasContext.clearRect(0, 0, this.canvas!.width, this.canvas!.height);
 
-    // Get the frequency data from the analyser
     this.analyser.getByteTimeDomainData(this.dataArray);
 
-    // Draw the waveform
     this.canvasContext.beginPath();
     const width = this.canvas!.width;
     const height = this.canvas!.height;
@@ -128,7 +118,6 @@ export class IndexComponent implements AfterViewChecked {
     this.canvasContext.lineWidth = 2;
     this.canvasContext.stroke();
 
-    // Continuously draw every 16ms (60 FPS)
     if (this.recording) {
       requestAnimationFrame(() => this.drawWaveform());
     }
