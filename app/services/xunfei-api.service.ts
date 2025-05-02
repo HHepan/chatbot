@@ -84,7 +84,7 @@ export class XunfeiApiService {
 
       // 连接建立完毕，读取数据进行识别
       ws.on('open', () => {
-        console.log("websocket connect!")
+        // console.log("websocket connect!")
         var readerStream = fs.createReadStream(this.config.file, {
           highWaterMark: this.config.highWaterMark
         });
@@ -172,7 +172,7 @@ export class XunfeiApiService {
         const res = JSON.parse(data.toString());
 
         if (res.code !== 0) {
-          console.error(`识别出错，code: ${res.code}, 原因: ${res.message}`);
+          console.error(`recognition error，code: ${res.code}, reason: ${res.message}`);
           return;
         }
 
@@ -199,14 +199,16 @@ export class XunfeiApiService {
         }
 
         if (isFinal) {
-          console.log('✅ 最终识别结果：', fullText);
+          // 在控制台中的打印结果是乱码，大概率是编码方式不同从而导致的显示差异的问题。
+          // 但其实返回的语音识别结果是正确的，输出至audio/result.txt文件中，开发过程中可以到此查看。
+          // console.log('Final recognition result：', fullText);
           // 可选：写入结果到文件（存储在项目根目录 audio/result.txt）
           const projectRoot = app.getAppPath();
           const resultPath = path.join(projectRoot, 'audio', 'result.txt');
           fs.writeFileSync(resultPath, fullText, 'utf8');
           ws.close();
         } else {
-          console.log('⏳ 中间识别结果：', fullText);
+          // console.log('Intermediate recognition results：', fullText);
         }
       });
 
