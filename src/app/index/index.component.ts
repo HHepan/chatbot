@@ -1,5 +1,5 @@
 import {AfterViewChecked, Component, ViewChild } from '@angular/core';
-import {BaiduApiService} from "../../services/baidu-api.service";
+import {XunfeiApiService} from "../../services/xunfei-api.service";
 
 @Component({
   selector: 'app-index',
@@ -21,7 +21,7 @@ export class IndexComponent implements AfterViewChecked {
   canvas: HTMLCanvasElement | null = null;
   canvasContext: CanvasRenderingContext2D | null = null;
 
-  constructor(private baiduApiService: BaiduApiService) {
+  constructor(private baiduApiService: XunfeiApiService) {
   }
 
   sendMessage() {
