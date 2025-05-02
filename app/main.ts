@@ -6,7 +6,7 @@ import {AppDataSource} from "./data-source";
 import {EventsCenter} from "./events.center";
 import {MainService} from "./main.service";
 import {ItemRepository} from "./repository/item.repository";
-import {BaiduApiService} from "./services/baidu-api.service";
+import {XunfeiApiService} from "./services/xunfei-api.service";
 let win: BrowserWindow | null = null;
 const eventsCenter = new EventsCenter();
 const args = process.argv.slice(1),
@@ -19,9 +19,10 @@ function createWindow(): BrowserWindow {
     // 实例化加载事件
     new ItemRepository(eventsCenter);
 
-    // 实例化百度api服务
-    new BaiduApiService(eventsCenter);
+    // 实例化讯飞api服务
+    new XunfeiApiService(eventsCenter);
 
+    // 监听所有事件
     eventsCenter.handleAll();
   })
 

@@ -9,7 +9,7 @@ const data_source_1 = require("./data-source");
 const events_center_1 = require("./events.center");
 const main_service_1 = require("./main.service");
 const item_repository_1 = require("./repository/item.repository");
-const baidu_api_service_1 = require("./services/baidu-api.service");
+const xunfei_api_service_1 = require("./services/xunfei-api.service");
 let win = null;
 const eventsCenter = new events_center_1.EventsCenter();
 const args = process.argv.slice(1), serve = args.some(val => val === '--serve');
@@ -20,7 +20,8 @@ function createWindow() {
         // 实例化加载事件
         new item_repository_1.ItemRepository(eventsCenter);
         // 实例化百度api服务
-        new baidu_api_service_1.BaiduApiService(eventsCenter);
+        new xunfei_api_service_1.XunfeiApiService(eventsCenter);
+        // 监听所有事件
         eventsCenter.handleAll();
     });
     // Create the browser window.

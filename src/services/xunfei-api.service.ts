@@ -2,12 +2,14 @@ import {Injectable} from "@angular/core";
 import {ElectronService} from "./electron.service";
 
 @Injectable()
-export class BaiduApiService {
+export class XunfeiApiService {
   constructor(private _electronService: ElectronService) {
   }
 
+  /**
+   * 语音识别 api
+   * */
   speechRecognitionApi() {
-    console.log('BaiduApiService speechRecognitionApi');
     this._electronService.ipcRenderer.invoke('speech-recognition-api');
   }
 }

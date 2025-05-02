@@ -1,10 +1,9 @@
 import {IpcMainInvokeEvent, ipcMain} from 'electron';
 import {EventsCenter} from "../events.center";
-import {Item} from "../entity/item";
 /**
- * 调用百度 api
+ * 调用讯飞 api
  */
-export class BaiduApiService {
+export class XunfeiApiService {
   constructor(private eventsCenter: EventsCenter) {
     this.loadEvents()
   }
@@ -16,6 +15,7 @@ export class BaiduApiService {
   loadEvents(): void {
     this.addEvent('speech-recognition-api', async () => {
       console.log('electron speech-recognition-api');
+      // 向讯飞语音识别api发起请求
     });
   }
 }
