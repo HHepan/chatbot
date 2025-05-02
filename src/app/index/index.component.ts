@@ -21,7 +21,7 @@ export class IndexComponent implements AfterViewChecked {
   canvas: HTMLCanvasElement | null = null;
   canvasContext: CanvasRenderingContext2D | null = null;
 
-  constructor(private baiduApiService: XunfeiApiService) {
+  constructor(private xunfeiApiService: XunfeiApiService) {
   }
 
   sendMessage() {
@@ -52,6 +52,9 @@ export class IndexComponent implements AfterViewChecked {
 
   toggleMode(mode: 'text' | 'audio') {
     this.mode = mode;
+    if (mode === 'text') {
+      this.stopMic();
+    }
   }
 
   startMic() {
@@ -73,7 +76,21 @@ export class IndexComponent implements AfterViewChecked {
       this.drawWaveform();
 
       console.log('🎙️ 麦克风已启动', stream);
-      this.baiduApiService.speechRecognitionApi();
+
+      const SAMPLE_RATE = 16000; // 目标采样率16K
+      const processor = this.audioContext.createScriptProcessor(4096, 1, 1);
+      source.connect(processor);
+      processor.connect(this.audioContext.destination);
+
+      processor.onaudioprocess = (event) => {
+        if (!this.recording) return;
+
+        const input = event.inputBuffer.getChannelData(0); // 32-bit float [-1.0, 1.0]
+        const downsampled = this.downsampleBuffer(input, this.audioContext!.sampleRate, SAMPLE_RATE);
+        const pcm = this.floatTo16BitPCM(downsampled);
+
+        this.xunfeiApiService.speechRecognitionApi(pcm);
+      };
     }).catch(err => {
       console.error('🚫 无法访问麦克风:', err);
     });
@@ -87,6 +104,7 @@ export class IndexComponent implements AfterViewChecked {
     if (this.audioContext) {
       this.audioContext.close();
     }
+    this.xunfeiApiService.stopSpeechRecognition();
   }
 
   drawWaveform() {
@@ -121,5 +139,34 @@ export class IndexComponent implements AfterViewChecked {
     if (this.recording) {
       requestAnimationFrame(() => this.drawWaveform());
     }
+  }
+
+  downsampleBuffer(buffer: Float32Array, inputSampleRate: number, outputSampleRate: number): Float32Array {
+    if (outputSampleRate === inputSampleRate) return buffer;
+    const ratio = inputSampleRate / outputSampleRate;
+    const length = Math.round(buffer.length / ratio);
+    const result = new Float32Array(length);
+    let offset = 0;
+    for (let i = 0; i < result.length; i++) {
+      const nextOffset = Math.round((i + 1) * ratio);
+      let sum = 0;
+      let count = 0;
+      for (let j = offset; j < nextOffset && j < buffer.length; j++) {
+        sum += buffer[j];
+        count++;
+      }
+      result[i] = sum / count;
+      offset = nextOffset;
+    }
+    return result;
+  }
+
+  floatTo16BitPCM(input: Float32Array): Int16Array {
+    const output = new Int16Array(input.length);
+    for (let i = 0; i < input.length; i++) {
+      const s = Math.max(-1, Math.min(1, input[i]));
+      output[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+    }
+    return output;
   }
 }

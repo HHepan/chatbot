@@ -19,7 +19,7 @@ function createWindow() {
         console.log(data_source_1.AppDataSource.isInitialized);
         // 实例化加载事件
         new item_repository_1.ItemRepository(eventsCenter);
-        // 实例化百度api服务
+        // 实例化讯飞api服务
         new xunfei_api_service_1.XunfeiApiService(eventsCenter);
         // 监听所有事件
         eventsCenter.handleAll();
