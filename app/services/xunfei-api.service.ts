@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 const CryptoJS = require('crypto-js');
 const WebSocket = require('ws');
+const axios = require('axios');
 
 
 /**
@@ -54,7 +55,7 @@ export class XunfeiApiService {
     let writeStream: fs.WriteStream | null = null;
 
     /**
-     * 调用语音识别
+     * 调用语音识别 api
      * */
     this.addEvent('speech-recognition-api', async (event, pcmBuffer: ArrayBuffer) => {
       if (!writeStream) {
@@ -232,6 +233,84 @@ export class XunfeiApiService {
       if (writeStream) {
         writeStream.end();
         writeStream = null;
+      }
+    });
+
+    /**
+     * 调用自然语言处理 api
+     * */
+    this.addEvent('natural-language-api', async (event, message: string) => {
+      // console.log('natural-language-api', message);
+
+      const url = 'https://spark-api-open.xf-yun.com/v1/chat/completions';
+
+      const data = {
+        model: 'generalv3.5',
+        messages: [
+          {
+            role: 'user',
+            content: message
+          }
+        ],
+        stream: true
+      };
+
+      const headers = {
+        Authorization: 'Bearer ihSTyylZRcULsrKSJIdv:owssiFeIVDNTzaUSwuyi', // 替换为真实密码
+        'Content-Type': 'application/json'
+      };
+
+      try {
+        const response = await axios.post(url, data, {
+          headers: headers,
+          responseType: 'stream'  // 关键：使用 stream 响应
+        });
+
+        response.data.setEncoding('utf8');
+
+        let buffer = '';
+
+        response.data.on('data', (chunk: string) => {
+          buffer += chunk;
+
+          const lines = buffer.split('\n');
+          buffer = lines.pop()!;
+
+          for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
+
+            if (line === 'data: [DONE]') {
+              console.log('Data transfer completed');
+              return;
+            }
+
+            if (line.startsWith('data:')) {
+              const jsonStr = line.slice(5).trim();  // 去掉 'data: '
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  // console.log(content);
+                  event.sender.send('natural-language-result', content);
+                }
+              } catch (e) {
+                console.error('JSON parse error:', e);
+              }
+            }
+          }
+        });
+
+        response.data.on('end', () => {
+          console.log('natural-language-api response end');
+        });
+
+        response.data.on('error', (err: { message: any; }) => {
+          console.error('Streaming response error：', err);
+        });
+
+      } catch (err) {
+        console.error('Request error:', err);
       }
     });
   }
