@@ -21,6 +21,8 @@ export class IndexComponent implements AfterViewChecked {
   canvas: HTMLCanvasElement | null = null;
   canvasContext: CanvasRenderingContext2D | null = null;
 
+  speechRecognitionText = '';
+
   constructor(private xunfeiApiService: XunfeiApiService) {
   }
 
@@ -89,7 +91,10 @@ export class IndexComponent implements AfterViewChecked {
         const downsampled = this.downsampleBuffer(input, this.audioContext!.sampleRate, SAMPLE_RATE);
         const pcm = this.floatTo16BitPCM(downsampled);
 
-        this.xunfeiApiService.speechRecognitionApi(pcm);
+        this.xunfeiApiService.speechRecognitionApi(pcm).subscribe(text => {
+          this.speechRecognitionText = text;
+          console.log('识别结果传回到C层：', text);
+        });
       };
     }).catch(err => {
       console.error('🚫 无法访问麦克风:', err);
