@@ -34,7 +34,7 @@ export class XunfeiApiService {
   };
 
   constructor(private eventsCenter: EventsCenter) {
-    this.loadEvents()
+    this.loadEvents();
   }
 
   addEvent(eventKey: string, listener: (event: IpcMainInvokeEvent, ...args: any[]) => (Promise<void>) | (any)): void {
@@ -206,6 +206,7 @@ export class XunfeiApiService {
           const projectRoot = app.getAppPath();
           const resultPath = path.join(projectRoot, 'audio', 'result.txt');
           fs.writeFileSync(resultPath, fullText, 'utf8');
+          event.sender.send('speech-recognition-result', fullText);
           ws.close();
         } else {
           // console.log('Intermediate recognition results：', fullText);
