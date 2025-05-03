@@ -22,12 +22,23 @@ export class IndexComponent implements AfterViewChecked {
   canvasContext: CanvasRenderingContext2D | null = null;
 
   speechRecognitionText = '';
+  naturalLanguageResult = '';
 
   constructor(private xunfeiApiService: XunfeiApiService) {
   }
 
   sendMessage() {
+    this.naturalLanguageResult = '';
     if (this.message.trim()) {
+
+      const naturalLanguageApiObserver = this.xunfeiApiService.naturalLanguageApi(this.message);
+
+      naturalLanguageApiObserver.subscribe(result => {
+        this.naturalLanguageResult += result; // 拼接返回内容
+        console.log('自然语言处理结果返回到C层', this.naturalLanguageResult);
+      });
+
+
       this.messages.push({ text: this.message, sender: 'user' });
       this.message = '';
 
