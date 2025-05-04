@@ -1,4 +1,4 @@
-import {AfterViewChecked, Component, OnInit, ViewChild} from '@angular/core';
+import {AfterViewChecked, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild} from '@angular/core';
 import {XunFeiApiService} from "../../services/xunfei-api.service";
 import {Message} from "../../../app/entity/message";
 import {DatePipe} from "@angular/common";
@@ -30,18 +30,22 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     user: 1
   }
 
+  answerRunning = false;
+
   constructor(private xunFeiApiService: XunFeiApiService,
               private datePipe: DatePipe,
-              private indexService: IndexService) {
+              private indexService: IndexService,
+              private ngZone: NgZone,
+              private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
+    this.messages = [];
     this.getAllMessage();
   }
 
   getAllMessage() {
     this.indexService.getAll().subscribe(allMessages => {
-      // console.log('getAllMessage', allMessages);
       allMessages.forEach((message: Message) => {
         this.messages.push(message);
       });
@@ -55,25 +59,23 @@ export class IndexComponent implements AfterViewChecked, OnInit {
 
       const naturalLanguageApiObserver = this.xunFeiApiService.naturalLanguageApi(this.messageContent);
 
-      // this.messages.push({ text: this.message, sender: 'user' });
       this.messageContent = '';
 
       const subscription = naturalLanguageApiObserver.subscribe(result => {
-        if (result === '[DONE]') {
-          subscription.unsubscribe(); // 停止接收后续数据
-          console.log('已完成响应，取消订阅');
-          return;
-        }
+        this.ngZone.run(() => {
+          if (result === '[DONE]') {
+            subscription.unsubscribe(); // 停止接收后续数据
+            console.log('已完成响应，取消订阅');
+            this.answerRunning = false;
+            this.addMessage(this.naturalLanguageResult, this.userRole.robot);
+            return;
+          }
+          this.answerRunning = true;
+          this.naturalLanguageResult += result;
 
-        this.naturalLanguageResult += result;
-        console.log('自然语言处理结果返回C层：', this.naturalLanguageResult);
+          console.log('自然语言处理结果返回C层：', this.naturalLanguageResult);
+        });
       });
-
-      // 模拟机器人的响应
-      // setTimeout(() => {
-      //   this.messages.push({ text: 'Thank you for your message!', sender: 'bot' });
-      //   this.scrollToBottom();
-      // }, 1000);
     }
   }
 
@@ -84,12 +86,10 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     message.time = this.getFormattedTime();
     message.role = role;
 
-    // console.log('addMessage', message);
     this.indexService.add(message).subscribe(result => {
       const newestMessage = result[result.length - 1];
-      console.log('add message success', newestMessage);
-      // this.messages.push(newestMessage);
-      this.getAllMessage();
+      this.messages.push(newestMessage);
+
     })
   }
 
