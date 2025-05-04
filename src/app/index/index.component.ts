@@ -119,6 +119,31 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     }
   }
 
+  getViewTime(msgTime: string | number | Date): string {
+    const msgDate = new Date(msgTime);
+    const now = new Date();
+
+    const pad = (n: number) => n.toString().padStart(2, '0');
+
+    const msgYMD = `${msgDate.getFullYear()}-${pad(msgDate.getMonth() + 1)}-${pad(msgDate.getDate())}`;
+    const nowYMD = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayYMD = `${yesterday.getFullYear()}-${pad(yesterday.getMonth() + 1)}-${pad(yesterday.getDate())}`;
+
+    const timePart = `${pad(msgDate.getHours())}:${pad(msgDate.getMinutes())}:${pad(msgDate.getSeconds())}`;
+
+    if (msgYMD === nowYMD) {
+      return `今天 ${timePart}`;
+    } else if (msgYMD === yesterdayYMD) {
+      return `昨天 ${timePart}`;
+    } else {
+      return `${msgYMD} ${timePart}`;
+    }
+  }
+
+
   // 开启麦克风
   startMic() {
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
