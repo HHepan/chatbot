@@ -1,17 +1,18 @@
-import {AfterViewChecked, Component, ViewChild } from '@angular/core';
-import {XunfeiApiService} from "../../services/xunfei-api.service";
+import {AfterViewChecked, Component, OnInit, ViewChild} from '@angular/core';
+import {XunFeiApiService} from "../../services/xunfei-api.service";
+import {Message} from "../../../app/entity/message";
+import {DatePipe} from "@angular/common";
+import {IndexService} from "../../services/index.service";
 
 @Component({
   selector: 'app-index',
   templateUrl: './index.component.html',
   styleUrls: ['./index.component.scss']
 })
-export class IndexComponent implements AfterViewChecked {
+export class IndexComponent implements AfterViewChecked, OnInit {
   @ViewChild('chatBody') private chatBody: any;
-  message: string = '';
-  messages: { text: string, sender: string }[] = [
-    { text: 'Hello, how can I assist you today?', sender: 'bot' }
-  ];
+  messageContent: string = '';
+  messages: Message[] = [];
   mode: 'text' | 'audio' = 'text'; // Default to 'text' mode
   recording = false;
   stream: MediaStream | null = null;
@@ -24,30 +25,77 @@ export class IndexComponent implements AfterViewChecked {
   speechRecognitionText = '';
   naturalLanguageResult = '';
 
-  constructor(private xunfeiApiService: XunfeiApiService) {
+  userRole = {
+    robot: 0,
+    user: 1
+  }
+
+  constructor(private xunFeiApiService: XunFeiApiService,
+              private datePipe: DatePipe,
+              private indexService: IndexService) {
+  }
+
+  ngOnInit(): void {
+    this.getAllMessage();
+  }
+
+  getAllMessage() {
+    this.indexService.getAll().subscribe(allMessages => {
+      // console.log('getAllMessage', allMessages);
+      allMessages.forEach((message: Message) => {
+        this.messages.push(message);
+      });
+    });
   }
 
   sendMessage() {
     this.naturalLanguageResult = '';
-    if (this.message.trim()) {
+    if (this.messageContent.trim()) {
+      this.addMessage(this.messageContent, this.userRole.user);
 
-      const naturalLanguageApiObserver = this.xunfeiApiService.naturalLanguageApi(this.message);
+      const naturalLanguageApiObserver = this.xunFeiApiService.naturalLanguageApi(this.messageContent);
 
-      naturalLanguageApiObserver.subscribe(result => {
-        this.naturalLanguageResult += result; // 拼接返回内容
-        console.log('自然语言处理结果返回到C层', this.naturalLanguageResult);
+      // this.messages.push({ text: this.message, sender: 'user' });
+      this.messageContent = '';
+
+      const subscription = naturalLanguageApiObserver.subscribe(result => {
+        if (result === '[DONE]') {
+          subscription.unsubscribe(); // 停止接收后续数据
+          console.log('已完成响应，取消订阅');
+          return;
+        }
+
+        this.naturalLanguageResult += result;
+        console.log('自然语言处理结果返回C层：', this.naturalLanguageResult);
       });
 
-
-      this.messages.push({ text: this.message, sender: 'user' });
-      this.message = '';
-
       // 模拟机器人的响应
-      setTimeout(() => {
-        this.messages.push({ text: 'Thank you for your message!', sender: 'bot' });
-        this.scrollToBottom();
-      }, 1000);
+      // setTimeout(() => {
+      //   this.messages.push({ text: 'Thank you for your message!', sender: 'bot' });
+      //   this.scrollToBottom();
+      // }, 1000);
     }
+  }
+
+  addMessage(messageContent: string, role: number) {
+    const message = new Message();
+
+    message.content = messageContent;
+    message.time = this.getFormattedTime();
+    message.role = role;
+
+    // console.log('addMessage', message);
+    this.indexService.add(message).subscribe(result => {
+      const newestMessage = result[result.length - 1];
+      console.log('add message success', newestMessage);
+      // this.messages.push(newestMessage);
+      this.getAllMessage();
+    })
+  }
+
+  getFormattedTime(): string {
+    const now = new Date();
+    return this.datePipe.transform(now, 'yyyy-MM-dd HH:mm:ss') || '';
   }
 
   scrollToBottom() {
@@ -63,6 +111,7 @@ export class IndexComponent implements AfterViewChecked {
     this.scrollToBottom();
   }
 
+  // 修改模式：文本/语音
   toggleMode(mode: 'text' | 'audio') {
     this.mode = mode;
     if (mode === 'text') {
@@ -70,6 +119,7 @@ export class IndexComponent implements AfterViewChecked {
     }
   }
 
+  // 开启麦克风
   startMic() {
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
       this.stream = stream;
@@ -99,12 +149,13 @@ export class IndexComponent implements AfterViewChecked {
         if (!this.recording) return;
 
         const input = event.inputBuffer.getChannelData(0); // 32-bit float [-1.0, 1.0]
-        const downsampled = this.downsampleBuffer(input, this.audioContext!.sampleRate, SAMPLE_RATE);
-        const pcm = this.floatTo16BitPCM(downsampled);
+        const downSampled = this.downSampleBuffer(input, this.audioContext!.sampleRate, SAMPLE_RATE);
+        const pcm = this.floatTo16BitPCM(downSampled);
 
-        this.xunfeiApiService.speechRecognitionApi(pcm).subscribe(text => {
+        // 调用语音识别
+        this.xunFeiApiService.speechRecognitionApi(pcm).subscribe(text => {
           this.speechRecognitionText = text;
-          console.log('识别结果传回到C层：', text);
+          console.log('语音识别结果传回到C层：', text);
         });
       };
     }).catch(err => {
@@ -112,17 +163,19 @@ export class IndexComponent implements AfterViewChecked {
     });
   }
 
+  // 关闭麦克风
   stopMic() {
     this.stream?.getTracks().forEach(track => track.stop());
     this.recording = false;
     console.log('🛑 麦克风已关闭');
 
-    if (this.audioContext) {
+    if (this.audioContext && this.audioContext?.state !== 'closed') {
       this.audioContext.close();
     }
-    this.xunfeiApiService.stopSpeechRecognition();
+    this.xunFeiApiService.stopSpeechRecognition();
   }
 
+  // 画出语音时的波形图
   drawWaveform() {
     if (!this.analyser || !this.canvasContext || !this.dataArray) return;
 
@@ -157,7 +210,8 @@ export class IndexComponent implements AfterViewChecked {
     }
   }
 
-  downsampleBuffer(buffer: Float32Array, inputSampleRate: number, outputSampleRate: number): Float32Array {
+  // 转换录音文件的格式
+  downSampleBuffer(buffer: Float32Array, inputSampleRate: number, outputSampleRate: number): Float32Array {
     if (outputSampleRate === inputSampleRate) return buffer;
     const ratio = inputSampleRate / outputSampleRate;
     const length = Math.round(buffer.length / ratio);
@@ -177,6 +231,7 @@ export class IndexComponent implements AfterViewChecked {
     return result;
   }
 
+  // 转换录音文件的格式为pcm
   floatTo16BitPCM(input: Float32Array): Int16Array {
     const output = new Int16Array(input.length);
     for (let i = 0; i < input.length; i++) {

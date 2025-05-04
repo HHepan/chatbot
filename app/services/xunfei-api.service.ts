@@ -10,7 +10,7 @@ const axios = require('axios');
 /**
  * 调用讯飞 api
  */
-export class XunfeiApiService {
+export class XunFeiApiService {
   // 系统配置
   config = {
     // 请求地址
@@ -282,6 +282,7 @@ export class XunfeiApiService {
 
             if (line === 'data: [DONE]') {
               console.log('Data transfer completed');
+              event.sender.send('natural-language-result', '[DONE]');
               return;
             }
 

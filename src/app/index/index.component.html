@@ -4,14 +4,14 @@
   </div>
   <div class="card-body chat-body" #chatBody>
     <div *ngFor="let msg of messages" class="d-flex mb-3">
-      <div *ngIf="msg.sender === 'user'" class="ms-auto">
+      <div *ngIf="msg.role === '1'" class="ms-auto">
         <div class="bg-green text-black p-2 rounded-3">
-          {{ msg.text }}
+          {{ msg.content }}
         </div>
       </div>
-      <div *ngIf="msg.sender === 'bot'" class="me-auto">
+      <div *ngIf="msg.role === '0'" class="me-auto">
         <div class="bg-light p-2 rounded-3">
-          {{ msg.text }}
+          {{ msg.content }}
         </div>
       </div>
     </div>
@@ -35,7 +35,7 @@
 
     <!-- 根据模式显示不同的 UI -->
     <div *ngIf="mode === 'text'" class="input-group">
-      <textarea [(ngModel)]="message" class="form-control" rows="3" placeholder="Type your message..."></textarea>
+      <textarea [(ngModel)]="messageContent" class="form-control" rows="3" placeholder="Type your message..."></textarea>
       <button class="btn" (click)="sendMessage()">发送</button>
     </div>
 

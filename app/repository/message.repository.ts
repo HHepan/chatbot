@@ -1,9 +1,9 @@
 import {EventsCenter} from "../events.center";
 import {IpcMainInvokeEvent} from "electron";
 import {AppDataSource} from "../data-source";
-import {Item} from "../entity/item";
-export class ItemRepository {
-  _baseUrl = 'item';
+import {Message} from "../entity/message";
+export class MessageRepository {
+  _baseUrl = 'message';
 
   constructor(private eventsCenter: EventsCenter) {
     this.loadEvents()
@@ -14,18 +14,18 @@ export class ItemRepository {
   }
 
   loadEvents(): void {
-    const itemRepo = AppDataSource.getRepository(Item);
+    const messageRepo = AppDataSource.getRepository(Message);
 
-    this.addEvent('add', async (event: any, _item: Item) => {
-      await itemRepo.save(_item);
-      return itemRepo.find();
+    this.addEvent('add', async (event: any, _item: Message) => {
+      await messageRepo.save(_item);
+      return messageRepo.find();
     });
 
     this.addEvent('getAll', (event, searchName: string) => {
       if (searchName === undefined) {
-        return itemRepo.find();
+        return messageRepo.find();
       } else {
-        return itemRepo.createQueryBuilder("item")
+        return messageRepo.createQueryBuilder("item")
           .where("name LIKE :param")
           .setParameters({
             param: '%' + searchName + '%'
@@ -33,19 +33,19 @@ export class ItemRepository {
       }
     });
 
-    this.addEvent('delete', async (event: any, _item: Item) => {
-      await itemRepo.remove(_item);
-      return itemRepo.find();
+    this.addEvent('delete', async (event: any, _item: Message) => {
+      await messageRepo.remove(_item);
+      return messageRepo.find();
     });
 
     this.addEvent('getById', async (event: any, itemId: number) => {
-      return itemRepo.findOne({where: {id: itemId}});
+      return messageRepo.findOne({where: {id: itemId}});
     });
 
-    this.addEvent('update', async (event: any, _newItem: Item) => {
+    this.addEvent('update', async (event: any, _newItem: Message) => {
       if (_newItem.id !== undefined) {
-        if ((await itemRepo.update(_newItem.id, _newItem)).affected === 1) {
-          return itemRepo.findOne({where: {id: _newItem.id}})
+        if ((await messageRepo.update(_newItem.id, _newItem)).affected === 1) {
+          return messageRepo.findOne({where: {id: _newItem.id}})
         }
       }
     });

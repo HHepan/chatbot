@@ -8,7 +8,7 @@ const fs = require("fs");
 const data_source_1 = require("./data-source");
 const events_center_1 = require("./events.center");
 const main_service_1 = require("./main.service");
-const item_repository_1 = require("./repository/item.repository");
+const message_repository_1 = require("./repository/message.repository");
 const xunfei_api_service_1 = require("./services/xunfei-api.service");
 let win = null;
 const eventsCenter = new events_center_1.EventsCenter();
@@ -18,9 +18,9 @@ function createWindow() {
     data_source_1.AppDataSource.initialize().then(r => {
         console.log(data_source_1.AppDataSource.isInitialized);
         // 实例化加载事件
-        new item_repository_1.ItemRepository(eventsCenter);
+        new message_repository_1.MessageRepository(eventsCenter);
         // 实例化讯飞api服务
-        new xunfei_api_service_1.XunfeiApiService(eventsCenter);
+        new xunfei_api_service_1.XunFeiApiService(eventsCenter);
         // 监听所有事件
         eventsCenter.handleAll();
     });
