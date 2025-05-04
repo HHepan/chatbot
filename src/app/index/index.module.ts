@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { IndexComponent } from './index.component';
 import {IndexRoutingModule} from "./index-routing.module";
 import {FormsModule} from "@angular/forms";
-import {XunfeiApiService} from "../../services/xunfei-api.service";
+import {XunFeiApiService} from "../../services/xunfei-api.service";
+import {IndexService} from "../../services/index.service";
 
 
 
@@ -16,6 +17,6 @@ import {XunfeiApiService} from "../../services/xunfei-api.service";
     IndexRoutingModule,
     FormsModule
   ],
-  providers: [XunfeiApiService]
+  providers: [XunFeiApiService, IndexService]
 })
 export class IndexModule { }

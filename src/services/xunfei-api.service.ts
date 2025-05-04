@@ -3,7 +3,7 @@ import {ElectronService} from "./electron.service";
 import {Observable} from "rxjs";
 
 @Injectable()
-export class XunfeiApiService {
+export class XunFeiApiService {
   constructor(private _electronService: ElectronService) {
   }
 

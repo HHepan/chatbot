@@ -2,36 +2,36 @@ import {Injectable} from "@angular/core";
 import {ElectronService} from "./electron.service";
 import {from, Observable, throwError} from "rxjs";
 import {catchError} from "rxjs/operators";
-import {Item} from "../../app/entity/item";
+import {Message} from "../../app/entity/message";
 
 @Injectable()
 export class IndexService {
-  baseUrl = 'item-';
+  baseUrl = 'message-';
   constructor(private _electronService: ElectronService) {
   }
 
-  add(item: Item): Observable<Electron.Item> {
-    return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'add', item))
+  add(message: Message) {
+    return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'add', message))
       .pipe(catchError((error: any) => throwError(error.json)));
   }
 
-  getAll(searchName: string | null) {
-    return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'getAll', searchName))
+  getAll() {
+    return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'getAll'))
       .pipe(catchError((error: any) => throwError(error.json)));
   }
 
-  delete(item: Item) {
-    return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'delete', item))
+  delete(message: Message) {
+    return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'delete', message))
       .pipe(catchError((error: any) => throwError(error.json)));
   }
 
-  getById(itemId: number) {
-    return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'getById', itemId))
+  getById(messageId: number) {
+    return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'getById', messageId))
       .pipe(catchError((error: any) => throwError(error.json)));
   }
 
-  update(newItem: Item) {
-    return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'update', newItem))
+  update(newMessage: Message) {
+    return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'update', newMessage))
       .pipe(catchError((error: any) => throwError(error.json)));
   }
 }
