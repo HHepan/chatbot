@@ -31,6 +31,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
   }
 
   answerRunning = false;
+  lastSpeechRecognitionTexts:string[] = [];
 
   constructor(private xunFeiApiService: XunFeiApiService,
               private datePipe: DatePipe,
@@ -52,12 +53,12 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     });
   }
 
-  sendMessage() {
+  sendMessage(messageContent: string) {
     this.naturalLanguageResult = '';
-    if (this.messageContent.trim()) {
-      this.addMessage(this.messageContent, this.userRole.user);
+    if (messageContent.trim()) {
+      this.addMessage(messageContent, this.userRole.user);
 
-      const naturalLanguageApiObserver = this.xunFeiApiService.naturalLanguageApi(this.messageContent);
+      const naturalLanguageApiObserver = this.xunFeiApiService.naturalLanguageApi(messageContent);
 
       this.messageContent = '';
 
@@ -68,12 +69,15 @@ export class IndexComponent implements AfterViewChecked, OnInit {
             console.log('已完成响应，取消订阅');
             this.answerRunning = false;
             this.addMessage(this.naturalLanguageResult, this.userRole.robot);
+            if (this.mode === 'audio') {
+              this.startMic();
+            }
             return;
           }
           this.answerRunning = true;
           this.naturalLanguageResult += result;
 
-          console.log('自然语言处理结果返回C层：', this.naturalLanguageResult);
+          // console.log('自然语言处理结果返回C层：', this.naturalLanguageResult);
         });
       });
     }
@@ -116,6 +120,8 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     this.mode = mode;
     if (mode === 'text') {
       this.stopMic();
+    } else if (mode === 'audio') {
+      this.startMic();
     }
   }
 
@@ -146,13 +152,14 @@ export class IndexComponent implements AfterViewChecked, OnInit {
 
   // 开启麦克风
   startMic() {
+    this.speechRecognitionText = '';
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
       this.stream = stream;
       this.recording = true;
 
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       this.analyser = this.audioContext.createAnalyser();
-      this.analyser.fftSize = 256;  // Choose FFT size for frequency analysis
+      this.analyser.fftSize = 256;
       this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
 
       const source = this.audioContext.createMediaStreamSource(stream);
@@ -160,12 +167,14 @@ export class IndexComponent implements AfterViewChecked, OnInit {
 
       this.canvas = document.getElementById('waveform') as HTMLCanvasElement;
       this.canvasContext = this.canvas.getContext('2d')!;
-
       this.drawWaveform();
 
       console.log('🎙️ 麦克风已启动', stream);
 
-      const SAMPLE_RATE = 16000; // 目标采样率16K
+      // 启动静音检测
+      // this.monitorSilence(stream);
+
+      const SAMPLE_RATE = 16000;
       const processor = this.audioContext.createScriptProcessor(4096, 1, 1);
       source.connect(processor);
       processor.connect(this.audioContext.destination);
@@ -173,14 +182,20 @@ export class IndexComponent implements AfterViewChecked, OnInit {
       processor.onaudioprocess = (event) => {
         if (!this.recording) return;
 
-        const input = event.inputBuffer.getChannelData(0); // 32-bit float [-1.0, 1.0]
+        const input = event.inputBuffer.getChannelData(0);
         const downSampled = this.downSampleBuffer(input, this.audioContext!.sampleRate, SAMPLE_RATE);
         const pcm = this.floatTo16BitPCM(downSampled);
+
+        let calledCheckRepeatedText = false;
 
         // 调用语音识别
         this.xunFeiApiService.speechRecognitionApi(pcm).subscribe(text => {
           this.speechRecognitionText = text;
-          console.log('语音识别结果传回到C层：', text);
+          // console.log('语音识别结果传回到C层：', text);
+          if (!calledCheckRepeatedText) {
+            // ⬇️ 新增重复检测逻辑
+            calledCheckRepeatedText = this.checkRepeatedText(text);
+          }
         });
       };
     }).catch(err => {
@@ -188,17 +203,74 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     });
   }
 
+
   // 关闭麦克风
   stopMic() {
     this.stream?.getTracks().forEach(track => track.stop());
     this.recording = false;
-    console.log('🛑 麦克风已关闭');
 
     if (this.audioContext && this.audioContext?.state !== 'closed') {
       this.audioContext.close();
+      console.log('🛑 麦克风已关闭');
+      if (this.speechRecognitionText !== '') {
+        this.sendMessage(this.speechRecognitionText);
+        this.speechRecognitionText = '';
+      }
     }
     this.xunFeiApiService.stopSpeechRecognition();
   }
+
+  // 检查语音识别文本是否重复，重复超过次数后自动停止
+  checkRepeatedText(currentText: string): boolean {
+    let result = false;
+    const MAX_REPEAT = 30;
+
+    // 只保留最新 30 条记录
+    this.lastSpeechRecognitionTexts.push(currentText);
+    if (this.lastSpeechRecognitionTexts.length > MAX_REPEAT) {
+      this.lastSpeechRecognitionTexts.shift();
+    }
+
+    // 检查是否全部一样
+    const allSame = this.lastSpeechRecognitionTexts.every(t => t === currentText);
+    if (allSame && this.lastSpeechRecognitionTexts.length === MAX_REPEAT) {
+      console.log('🛑 检测到连续重复文本，自动停止麦克风');
+      this.stopMic();
+      result = true;
+    }
+    return result;
+  }
+
+  // 检测静音
+  monitorSilence(stream: MediaStream) {
+    let silenceStartTime: number | null = null;
+    const silenceThreshold = 0.01;
+    const silenceDuration = 5000;
+
+    const checkSilence = () => {
+      this.analyser!.getByteTimeDomainData(this.dataArray!);
+      const average = this.dataArray!.reduce((sum, val) => sum + Math.abs(val - 128), 0) / this.dataArray!.length;
+
+      if (average < silenceThreshold * 128) {
+        if (silenceStartTime === null) {
+          silenceStartTime = Date.now();
+        } else if (Date.now() - silenceStartTime > silenceDuration) {
+          console.log('🤫 检测到持续静音，自动停止麦克风');
+          this.stopMic();
+          return;
+        }
+      } else {
+        silenceStartTime = null;
+      }
+
+      if (this.recording) {
+        requestAnimationFrame(checkSilence);
+      }
+    };
+
+    requestAnimationFrame(checkSilence);
+  }
+
 
   // 画出语音时的波形图
   drawWaveform() {
