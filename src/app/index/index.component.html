@@ -43,14 +43,15 @@
     <!-- 根据模式显示不同的 UI -->
     <div *ngIf="mode === 'text'" class="input-group">
       <textarea [(ngModel)]="messageContent" class="form-control" rows="3" placeholder="在此输入问题..."></textarea>
-      <button class="btn" (click)="sendMessage()">发送</button>
+      <button class="btn" (click)="sendMessage(messageContent)">发送</button>
     </div>
 
     <div *ngIf="mode === 'audio'" class="input-group">
       <canvas id="waveform" class="form-control"></canvas>
-      <button class="btn" (click)="recording ? stopMic() : startMic()">
-        {{ recording ? '停止' : '录音' }}
-      </button>
+<!--      <button class="btn" (click)="recording ? stopMic() : startMic()">-->
+<!--        {{ recording ? '停止' : '录音' }}-->
+<!--      </button>-->
+      <textarea [(ngModel)]="speechRecognitionText" class="form-control" rows="3"  placeholder="语音识别结果..." readonly></textarea>
     </div>
   </div>
 </div>

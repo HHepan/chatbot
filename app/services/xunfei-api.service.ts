@@ -216,8 +216,8 @@ export class XunFeiApiService {
 
       // 资源释放
       ws.on('close', () => {
-        // console.log(`本次识别sid：${currentSid}`)
-        // console.log('connect close!')
+        // console.log(`this time speech recognition sid：${currentSid}`)
+        // console.log('ws connect close!')
       })
 
       // 建连错误
