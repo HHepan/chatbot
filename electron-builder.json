@@ -1,6 +1,6 @@
 {
   "asar": true,
-  "productName": "CS-project-demo",
+  "productName": "chatbot",
   "directories": {
     "output": "release/"
   },
@@ -16,7 +16,7 @@
     }
   ],
   "win": {
-    "icon": "dist/assets/icons/node_record.ico",
+    "icon": "dist/assets/icons/AI_Chat_logo.ico",
     "target": [
       "portable"
     ]

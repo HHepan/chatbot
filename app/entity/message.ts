@@ -14,5 +14,5 @@ export class Message {
 
   // 发送该消息的角色 0：机器人；1：用户
   @Column({ type: 'varchar' })
-  role: number | undefined;
+  role: number | string | undefined;
 }

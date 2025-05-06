@@ -66,12 +66,10 @@ export class IndexComponent implements AfterViewChecked, OnInit {
         this.ngZone.run(() => {
           if (result === '[DONE]') {
             subscription.unsubscribe(); // 停止接收后续数据
-            console.log('已完成响应，取消订阅');
+            // console.log('已完成响应，取消订阅');
             this.answerRunning = false;
             this.addMessage(this.naturalLanguageResult, this.userRole.robot);
-            if (this.mode === 'audio') {
-              this.startMic();
-            }
+            this.speechRecognitionText = '';
             return;
           }
           this.answerRunning = true;
@@ -92,14 +90,23 @@ export class IndexComponent implements AfterViewChecked, OnInit {
 
     this.indexService.add(message).subscribe(result => {
       const newestMessage = result[result.length - 1];
-      console.log('addMessage newestMessage', newestMessage);
+      // console.log('addMessage newestMessage', newestMessage);
       this.messages.push(newestMessage);
       if (this.mode === 'audio' && newestMessage.role === this.userRole.robot.toString()) {
-        console.log('call speechSynthesisApi');
-        this.xunFeiApiService.speechSynthesisApi(newestMessage.content).subscribe(wavPath => {
-          console.log('speechSynthesisApi result', wavPath);
-          const audio = new Audio(`file://${wavPath}`);
+        const speechSynthesisApiObserver = this.xunFeiApiService.speechSynthesisApi(newestMessage.content);
+
+        const subscription = speechSynthesisApiObserver.subscribe(base64 => {
+          // console.log('speechSynthesisApi result', base64);
+          const audio = new Audio(`data:audio/wav;base64,${base64}`);
+          console.log('audio play');
           audio.play();
+          audio.addEventListener('ended', () => {
+            console.log('播放完成');
+            subscription.unsubscribe();
+            if (this.mode === 'audio') {
+              this.startMic();
+            }
+          });
         });
       }
     })
@@ -133,7 +140,8 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     }
   }
 
-  getViewTime(msgTime: string | number | Date): string {
+  getViewTime(msgTime: string | undefined): string {
+    // @ts-ignore
     const msgDate = new Date(msgTime);
     const now = new Date();
 

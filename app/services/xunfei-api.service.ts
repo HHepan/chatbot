@@ -8,7 +8,6 @@ const CryptoJS = require('crypto-js');
 const WebSocket = require('ws');
 const axios = require('axios');
 
-
 /**
  * 调用讯飞 api
  */
@@ -333,7 +332,7 @@ export class XunFeiApiService {
      * */
     this.addEvent('speech-synthesis-api', async (event, text: string) => {
       // return 'okokok';
-      console.log('speech-synthesis-api', text);
+      // console.log('speech-synthesis-api', text);
       const config = {
         hostUrl: "wss://tts-api.xfyun.cn/v2/tts",
         host: "tts-api.xfyun.cn",
@@ -369,7 +368,7 @@ export class XunFeiApiService {
           business: {
             aue: "raw",
             auf: "audio/L16;rate=16000",
-            vcn: "xiaoyan",
+            vcn: "x4_lingyuyan",
             tte: "UTF8",
           },
           data: {
@@ -395,8 +394,11 @@ export class XunFeiApiService {
           const audioWavFilePath = path.join(projectRoot, 'audio', 'tts_output.wav');
           try {
             await this.convertPcmToWav(audioPcmFilePath, audioWavFilePath);
-            console.log('----------------------------------------------audioWavFilePath:', audioWavFilePath);
-            event.sender.send('speech-synthesis-result', audioWavFilePath);
+            console.log('audioWavFilePath:', audioWavFilePath);
+            const fileBuffer = fs.readFileSync(audioWavFilePath);
+            const base64Data = fileBuffer.toString('base64');
+
+            event.sender.send('speech-synthesis-result', base64Data);
           } catch (err) {
             console.error('convertPcmToWav error：', err);
           }
@@ -418,7 +420,7 @@ export class XunFeiApiService {
     if (fs.existsSync(wavPath)) {
       try {
         fs.unlinkSync(wavPath);
-        console.log(`deleted old WAV: ${wavPath}`);
+        // console.log(`deleted old WAV: ${wavPath}`);
       } catch (err) {
         console.error(`delete old WAV failed: ${err}`);
         throw err;
@@ -435,7 +437,7 @@ export class XunFeiApiService {
       ]);
 
       ffmpegProcess.stderr.on('data', (data: Buffer) => {
-        console.error(`FFmpeg error: ${data.toString()}`);
+        // console.error(`FFmpeg error: ${data.toString()}`);
       });
 
       ffmpegProcess.on('close', (code: number) => {
