@@ -14,7 +14,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
   messageContent: string = '';
   messages: Message[] = [];
   mode: 'text' | 'audio' = 'text'; // Default to 'text' mode
-  recording = false;
+  inConversation = false;
   stream: MediaStream | null = null;
   audioContext: AudioContext | null = null;
   analyser: AnalyserNode | null = null;
@@ -121,7 +121,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     if (mode === 'text') {
       this.stopMic();
     } else if (mode === 'audio') {
-      this.startMic();
+      // this.startMic();
     }
   }
 
@@ -155,7 +155,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     this.speechRecognitionText = '';
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
       this.stream = stream;
-      this.recording = true;
+      this.inConversation = true;
 
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       this.analyser = this.audioContext.createAnalyser();
@@ -180,7 +180,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
       processor.connect(this.audioContext.destination);
 
       processor.onaudioprocess = (event) => {
-        if (!this.recording) return;
+        if (!this.inConversation) return;
 
         const input = event.inputBuffer.getChannelData(0);
         const downSampled = this.downSampleBuffer(input, this.audioContext!.sampleRate, SAMPLE_RATE);
@@ -207,7 +207,6 @@ export class IndexComponent implements AfterViewChecked, OnInit {
   // 关闭麦克风
   stopMic() {
     this.stream?.getTracks().forEach(track => track.stop());
-    this.recording = false;
 
     if (this.audioContext && this.audioContext?.state !== 'closed') {
       this.audioContext.close();
@@ -215,6 +214,8 @@ export class IndexComponent implements AfterViewChecked, OnInit {
       if (this.speechRecognitionText !== '') {
         this.sendMessage(this.speechRecognitionText);
         this.speechRecognitionText = '';
+      } else {
+        this.inConversation = false;
       }
     }
     this.xunFeiApiService.stopSpeechRecognition();
@@ -263,7 +264,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
         silenceStartTime = null;
       }
 
-      if (this.recording) {
+      if (this.inConversation) {
         requestAnimationFrame(checkSilence);
       }
     };
@@ -302,7 +303,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     this.canvasContext.lineWidth = 2;
     this.canvasContext.stroke();
 
-    if (this.recording) {
+    if (this.inConversation) {
       requestAnimationFrame(() => this.drawWaveform());
     }
   }
