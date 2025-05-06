@@ -1,6 +1,7 @@
 import {Injectable} from "@angular/core";
 import {ElectronService} from "./electron.service";
-import {Observable} from "rxjs";
+import {from, Observable, throwError} from "rxjs";
+import {catchError} from "rxjs/operators";
 
 @Injectable()
 export class XunFeiApiService {
@@ -51,6 +52,25 @@ export class XunFeiApiService {
       // 关键：在取消订阅时移除监听器，防止重复
       return () => {
         this._electronService.ipcRenderer.removeListener('natural-language-result', listener);
+      };
+    });
+  }
+
+  /**
+   * 语音合成 api
+   * */
+  speechSynthesisApi(text: string) {
+    this._electronService.ipcRenderer.invoke('speech-synthesis-api', text);
+    return new Observable<string>(observer => {
+      const listener = (_event: any, data: string) => {
+        observer.next(data);
+      };
+
+      this._electronService.ipcRenderer.on('speech-synthesis-result', listener);
+
+      // 关键：在取消订阅时移除监听器，防止重复
+      return () => {
+        this._electronService.ipcRenderer.removeListener('speech-synthesis-result', listener);
       };
     });
   }

@@ -26,6 +26,8 @@ src/**/*.js
 *.js.map
 audio/*.pcm
 audio/*.txt
+audio/*.wav
+db/*.db
 
 # dependencies
 node_modules

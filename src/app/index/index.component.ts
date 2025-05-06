@@ -92,8 +92,16 @@ export class IndexComponent implements AfterViewChecked, OnInit {
 
     this.indexService.add(message).subscribe(result => {
       const newestMessage = result[result.length - 1];
+      console.log('addMessage newestMessage', newestMessage);
       this.messages.push(newestMessage);
-
+      if (this.mode === 'audio' && newestMessage.role === this.userRole.robot.toString()) {
+        console.log('call speechSynthesisApi');
+        this.xunFeiApiService.speechSynthesisApi(newestMessage.content).subscribe(wavPath => {
+          console.log('speechSynthesisApi result', wavPath);
+          const audio = new Audio(`file://${wavPath}`);
+          audio.play();
+        });
+      }
     })
   }
 
@@ -152,6 +160,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
 
   // 开启麦克风
   startMic() {
+    this.lastSpeechRecognitionTexts = [];
     this.speechRecognitionText = '';
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
       this.stream = stream;
