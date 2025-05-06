@@ -1,6 +1,6 @@
 <div class="card shadow-lg chat-card">
   <div class="card-header text-white">
-    <h5>Chatbot</h5>
+    <h5>ChatBot</h5>
   </div>
   <div class="card-body chat-body" #chatBody>
     <div *ngFor="let msg of messages" class="d-flex mb-3">
@@ -47,7 +47,18 @@
     </div>
 
     <div *ngIf="mode === 'audio'" class="input-group">
-      <canvas id="waveform" class="form-control"></canvas>
+      <canvas *ngIf="!isAudioPlaying" id="waveform" class="form-control"></canvas>
+      <div *ngIf="isAudioPlaying" class="voice-message form-control">
+        <img src="assets/emoji.png" class="emoji" />
+        <div class="voice-animation">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
       <textarea [(ngModel)]="speechRecognitionText" class="form-control" rows="3"  [placeholder]="inConversation ? '语音识别结果...' : '请点击右侧按钮开启对话'" readonly></textarea>
       <button class="btn" (click)="startMic()" [style.background-color]="inConversation ? 'coral' : ''">
         {{ inConversation ? '正在对话' : '开启对话' }}

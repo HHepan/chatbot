@@ -32,6 +32,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
 
   answerRunning = false;
   lastSpeechRecognitionTexts:string[] = [];
+  isAudioPlaying = false;
 
   constructor(private xunFeiApiService: XunFeiApiService,
               private datePipe: DatePipe,
@@ -100,9 +101,11 @@ export class IndexComponent implements AfterViewChecked, OnInit {
           const audio = new Audio(`data:audio/wav;base64,${base64}`);
           console.log('audio play');
           audio.play();
+          this.isAudioPlaying = true;
           audio.addEventListener('ended', () => {
             console.log('播放完成');
             subscription.unsubscribe();
+            this.isAudioPlaying = false;
             if (this.mode === 'audio') {
               this.startMic();
             }
