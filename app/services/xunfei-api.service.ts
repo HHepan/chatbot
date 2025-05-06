@@ -385,8 +385,12 @@ export class XunFeiApiService {
           ws.close();
           return;
         }
-        const audio = Buffer.from(res.data.audio, 'base64');
-        fs.writeFileSync(audioPcmFilePath, audio, {flag: 'a'});
+        if (res.data.audio) {
+          const audio = Buffer.from(res.data.audio, 'base64');
+          fs.writeFileSync(audioPcmFilePath, audio, { flag: 'a' });
+        } else {
+          console.warn('Warning: res.data.audio is null or undefined. Skipping write.');
+        }
         if (res.data.status === 2) {
           ws.close();
           console.log('Synthesis complete, file saved to:', audioPcmFilePath);
