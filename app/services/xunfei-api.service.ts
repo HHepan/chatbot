@@ -2,6 +2,8 @@ import {IpcMainInvokeEvent, ipcMain, app} from 'electron';
 import {EventsCenter} from "../events.center";
 import * as fs from 'fs';
 import * as path from 'path';
+import {spawn} from "child_process";
+const ffmpegPath = require('ffmpeg-static');
 const CryptoJS = require('crypto-js');
 const WebSocket = require('ws');
 const axios = require('axios');
@@ -11,29 +13,6 @@ const axios = require('axios');
  * 调用讯飞 api
  */
 export class XunFeiApiService {
-  // 系统配置
-  config = {
-    // 请求地址
-    hostUrl: "wss://iat-api.xfyun.cn/v2/iat",
-    host: "iat-api.xfyun.cn",
-    //在控制台-我的应用-语音听写（流式版）获取
-    appid: "da9c4155",
-    //在控制台-我的应用-语音听写（流式版）获取
-    apiSecret: "ODc1M2JjNzAxMGU3NDg4OTg5YzBlOTI1",
-    //在控制台-我的应用-语音听写（流式版）获取
-    apiKey: "b2c58394f9b57e659c8a47855a364354",
-    file: "./audio/recording.pcm", //请填写您的音频文件路径
-    uri: "/v2/iat",
-    highWaterMark: 1280
-  };
-
-  // 帧定义
-  FRAME = {
-    STATUS_FIRST_FRAME: 0,
-    STATUS_CONTINUE_FRAME: 1,
-    STATUS_LAST_FRAME: 2
-  };
-
   constructor(private eventsCenter: EventsCenter) {
     this.loadEvents();
   }
@@ -58,6 +37,29 @@ export class XunFeiApiService {
      * 调用语音识别 api
      * */
     this.addEvent('speech-recognition-api', async (event, pcmBuffer: ArrayBuffer) => {
+      // 系统配置
+      const config = {
+        // 请求地址
+        hostUrl: "wss://iat-api.xfyun.cn/v2/iat",
+        host: "iat-api.xfyun.cn",
+        //在控制台-我的应用-语音听写（流式版）获取
+        appid: "da9c4155",
+        //在控制台-我的应用-语音听写（流式版）获取
+        apiSecret: "ODc1M2JjNzAxMGU3NDg4OTg5YzBlOTI1",
+        //在控制台-我的应用-语音听写（流式版）获取
+        apiKey: "b2c58394f9b57e659c8a47855a364354",
+        file: "./audio/recording.pcm", //请填写您的音频文件路径
+        uri: "/v2/iat",
+        highWaterMark: 1280
+      };
+
+      // 帧定义
+      const FRAME = {
+        STATUS_FIRST_FRAME: 0,
+        STATUS_CONTINUE_FRAME: 1,
+        STATUS_LAST_FRAME: 2
+      };
+
       if (!writeStream) {
         writeStream = fs.createWriteStream(outputPath, { flags: 'w' });
       }
@@ -67,27 +69,27 @@ export class XunFeiApiService {
       // 获取当前时间 RFC1123格式
       let date = (new Date().toUTCString());
       // 设置当前临时状态为初始化
-      let status = this.FRAME.STATUS_FIRST_FRAME;
+      let status = FRAME.STATUS_FIRST_FRAME;
       // 记录本次识别用sid
       let currentSid = "";
       // 识别结果
       let iatResult: any[] = [];
 
       // 鉴权签名
-      let signatureOrigin = `host: ${this.config.host}\ndate: ${date}\nGET ${this.config.uri} HTTP/1.1`;
-      let signatureSha = CryptoJS.HmacSHA256(signatureOrigin, this.config.apiSecret);
+      let signatureOrigin = `host: ${config.host}\ndate: ${date}\nGET ${config.uri} HTTP/1.1`;
+      let signatureSha = CryptoJS.HmacSHA256(signatureOrigin, config.apiSecret);
       let signature = CryptoJS.enc.Base64.stringify(signatureSha);
-      let authorizationOrigin = `api_key="${this.config.apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`;
+      let authorizationOrigin = `api_key="${config.apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`;
       let authStr = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(authorizationOrigin));
 
-      let wssUrl = this.config.hostUrl + "?authorization=" + authStr + "&date=" + date + "&host=" + this.config.host;
+      let wssUrl = config.hostUrl + "?authorization=" + authStr + "&date=" + date + "&host=" + config.host;
       let ws = new WebSocket(wssUrl);
 
       // 连接建立完毕，读取数据进行识别
       ws.on('open', () => {
         // console.log("websocket connect!")
-        var readerStream = fs.createReadStream(this.config.file, {
-          highWaterMark: this.config.highWaterMark
+        var readerStream = fs.createReadStream(config.file, {
+          highWaterMark: config.highWaterMark
         });
         readerStream.on('data', (chunk) => {
           // send(chunk)
@@ -99,11 +101,11 @@ export class XunFeiApiService {
             "encoding": "raw"
           }
           switch (status) {
-            case this.FRAME.STATUS_FIRST_FRAME:
+            case FRAME.STATUS_FIRST_FRAME:
               frame = {
                 // 填充common
                 common: {
-                  app_id: this.config.appid
+                  app_id: config.appid
                 },
                 //填充business
                 business: {
@@ -115,10 +117,10 @@ export class XunFeiApiService {
                 //填充data
                 data: frameDataSection
               }
-              status = this.FRAME.STATUS_CONTINUE_FRAME;
+              status = FRAME.STATUS_CONTINUE_FRAME;
               break;
-            case this.FRAME.STATUS_CONTINUE_FRAME:
-            case this.FRAME.STATUS_LAST_FRAME:
+            case FRAME.STATUS_CONTINUE_FRAME:
+            case FRAME.STATUS_LAST_FRAME:
               //填充frame
               frame = {
                 data: frameDataSection
@@ -129,7 +131,7 @@ export class XunFeiApiService {
         });
         // 最终帧发送结束
         readerStream.on('end', () => {
-          status = this.FRAME.STATUS_LAST_FRAME
+          status = FRAME.STATUS_LAST_FRAME
           // send("")
           let frame;
           let frameDataSection = {
@@ -139,11 +141,11 @@ export class XunFeiApiService {
             "encoding": "raw"
           }
           switch (status) {
-            case this.FRAME.STATUS_FIRST_FRAME:
+            case FRAME.STATUS_FIRST_FRAME:
               frame = {
                 // 填充common
                 common: {
-                  app_id: this.config.appid
+                  app_id: config.appid
                 },
                 //填充business
                 business: {
@@ -155,10 +157,10 @@ export class XunFeiApiService {
                 //填充data
                 data: frameDataSection
               }
-              status = this.FRAME.STATUS_CONTINUE_FRAME;
+              status = FRAME.STATUS_CONTINUE_FRAME;
               break;
-            case this.FRAME.STATUS_CONTINUE_FRAME:
-            case this.FRAME.STATUS_LAST_FRAME:
+            case FRAME.STATUS_CONTINUE_FRAME:
+            case FRAME.STATUS_LAST_FRAME:
               //填充frame
               frame = {
                 data: frameDataSection
@@ -292,7 +294,7 @@ export class XunFeiApiService {
             if (!line) continue;
 
             if (line === 'data: [DONE]') {
-              console.log('Data transfer completed');
+              // console.log('Data transfer completed');
               event.sender.send('natural-language-result', '[DONE]');
               return;
             }
@@ -314,7 +316,7 @@ export class XunFeiApiService {
         });
 
         response.data.on('end', () => {
-          console.log('natural-language-api response end');
+          // console.log('natural-language-api response end');
         });
 
         response.data.on('error', (err: { message: any; }) => {
@@ -324,6 +326,126 @@ export class XunFeiApiService {
       } catch (err) {
         console.error('Request error:', err);
       }
+    });
+
+    /**
+     * 调用语音合成 api
+     * */
+    this.addEvent('speech-synthesis-api', async (event, text: string) => {
+      // return 'okokok';
+      console.log('speech-synthesis-api', text);
+      const config = {
+        hostUrl: "wss://tts-api.xfyun.cn/v2/tts",
+        host: "tts-api.xfyun.cn",
+        appid: "da9c4155",
+        apiSecret: "ODc1M2JjNzAxMGU3NDg4OTg5YzBlOTI1",
+        apiKey: "b2c58394f9b57e659c8a47855a364354",
+        uri: "/v2/tts",
+      };
+
+      const date = new Date().toUTCString();
+      // 鉴权签名
+      const signatureOrigin = `host: ${config.host}\ndate: ${date}\nGET ${config.uri} HTTP/1.1`;
+      const signatureSha = CryptoJS.HmacSHA256(signatureOrigin, config.apiSecret);
+      const signature = CryptoJS.enc.Base64.stringify(signatureSha);
+      const authorizationOrigin = `api_key=\"${config.apiKey}\", algorithm=\"hmac-sha256\", headers=\"host date request-line\", signature=\"${signature}\"`;
+      const authStr = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(authorizationOrigin));
+
+      const wssUrl = `${config.hostUrl}?authorization=${authStr}&date=${encodeURIComponent(date)}&host=${config.host}`;
+      const ws = new WebSocket(wssUrl);
+
+      const projectRoot = app.getAppPath();
+      const audioPcmFilePath = path.join(projectRoot, 'audio', 'tts_output.pcm');
+
+      // const audioFilePath = path.join(app.getPath('userData'), 'tts_output.pcm');
+      if (fs.existsSync(audioPcmFilePath)) {
+        fs.unlinkSync(audioPcmFilePath);
+      }
+
+      ws.on('open', () => {
+        console.log("WebSocket connected");
+        const frame = {
+          common: { app_id: config.appid },
+          business: {
+            aue: "raw",
+            auf: "audio/L16;rate=16000",
+            vcn: "xiaoyan",
+            tte: "UTF8",
+          },
+          data: {
+            text: Buffer.from(text).toString('base64'),
+            status: 2,
+          },
+        };
+        ws.send(JSON.stringify(frame));
+      });
+
+      ws.on('message', async (data: any) => {
+        const res = JSON.parse(data);
+        if (res.code !== 0) {
+          console.error(`Error ${res.code}: ${res.message}`);
+          ws.close();
+          return;
+        }
+        const audio = Buffer.from(res.data.audio, 'base64');
+        fs.writeFileSync(audioPcmFilePath, audio, {flag: 'a'});
+        if (res.data.status === 2) {
+          ws.close();
+          console.log('Synthesis complete, file saved to:', audioPcmFilePath);
+          const audioWavFilePath = path.join(projectRoot, 'audio', 'tts_output.wav');
+          try {
+            await this.convertPcmToWav(audioPcmFilePath, audioWavFilePath);
+            console.log('----------------------------------------------audioWavFilePath:', audioWavFilePath);
+            event.sender.send('speech-synthesis-result', audioWavFilePath);
+          } catch (err) {
+            console.error('convertPcmToWav error：', err);
+          }
+        }
+      });
+
+      ws.on('close', () => {
+        console.log('WebSocket closed');
+      });
+
+      ws.on('error', (err: any) => {
+        console.error('WebSocket error:', err);
+      });
+    });
+  }
+
+  private async convertPcmToWav(pcmPath: string, wavPath: string): Promise<void> {
+    // 如果目标 WAV 文件已存在，先删除它
+    if (fs.existsSync(wavPath)) {
+      try {
+        fs.unlinkSync(wavPath);
+        console.log(`deleted old WAV: ${wavPath}`);
+      } catch (err) {
+        console.error(`delete old WAV failed: ${err}`);
+        throw err;
+      }
+    }
+
+    return new Promise<void>((resolve, reject) => {
+      const ffmpegProcess = spawn(ffmpegPath as string, [
+        '-f', 's16le',
+        '-ar', '16000',
+        '-ac', '1',
+        '-i', pcmPath,
+        wavPath
+      ]);
+
+      ffmpegProcess.stderr.on('data', (data: Buffer) => {
+        console.error(`FFmpeg error: ${data.toString()}`);
+      });
+
+      ffmpegProcess.on('close', (code: number) => {
+        if (code === 0) {
+          console.log('convertPcmToWav complete:' + wavPath);
+          resolve();
+        } else {
+          reject(new Error('FFmpeg convertPcmToWav error'));
+        }
+      });
     });
   }
 }
