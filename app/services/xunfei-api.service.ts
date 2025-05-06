@@ -3,6 +3,7 @@ import {EventsCenter} from "../events.center";
 import * as fs from 'fs';
 import * as path from 'path';
 import {spawn} from "child_process";
+import {xunFeiApiConfig} from "../xunfei-api.config";
 const ffmpegPath = require('ffmpeg-static');
 const CryptoJS = require('crypto-js');
 const WebSocket = require('ws');
@@ -39,14 +40,14 @@ export class XunFeiApiService {
       // 系统配置
       const config = {
         // 请求地址
-        hostUrl: "wss://iat-api.xfyun.cn/v2/iat",
-        host: "iat-api.xfyun.cn",
+        hostUrl: xunFeiApiConfig.speechRecognitionHostUrl,
+        host: xunFeiApiConfig.speechRecognitionHost,
         //在控制台-我的应用-语音听写（流式版）获取
-        appid: "da9c4155",
+        appid: xunFeiApiConfig.appid,
         //在控制台-我的应用-语音听写（流式版）获取
-        apiSecret: "ODc1M2JjNzAxMGU3NDg4OTg5YzBlOTI1",
+        apiSecret: xunFeiApiConfig.apiSecret,
         //在控制台-我的应用-语音听写（流式版）获取
-        apiKey: "b2c58394f9b57e659c8a47855a364354",
+        apiKey: xunFeiApiConfig.apiKey,
         file: "./audio/recording.pcm", //请填写您的音频文件路径
         uri: "/v2/iat",
         highWaterMark: 1280
@@ -243,7 +244,7 @@ export class XunFeiApiService {
     this.addEvent('natural-language-api', async (event, message: string) => {
       // console.log('natural-language-api', message);
 
-      const url = 'https://spark-api-open.xf-yun.com/v1/chat/completions';
+      const url = xunFeiApiConfig.naturalLanguageUrl;
 
       const data = {
         max_tokens: 100,
@@ -253,11 +254,9 @@ export class XunFeiApiService {
         messages: [
           {
             role: "system",
-            content: "你是一个充满智慧的好知己，随时准备提供情感上的支持。无论是生活中的琐事还是工作上的烦恼，你总能以一种平和、自然的方式给予安慰。你话语间带有温暖与关怀，偶尔会加上一些幽默，时不时让人会心一笑。你擅长倾听，能用简单但深刻的话语帮助他人理清思绪，找到前进的力量。" +
-              "当我分享困惑时，你能通过平和的语言提供支持，带点哲理和智慧，让我感到轻松、舒适。\n" +
-              "你的回答不需要太过华丽，保持自然流畅，温暖且亲切。偶尔加入一些幽默或轻松的元素，让我在需要时感到放松。\n" +
-              "你的话语要传达理解和支持，能够让人感觉到安慰和陪伴，而不是做过多的解释或过度分析。\n" +
-              "你的回复中不需要角色扮演和虚拟动作。\n回复字数请限制在150字以内。"
+            content: xunFeiApiConfig.naturalLanguageCharacterSetting +
+                     xunFeiApiConfig.naturalLanguageInstructionDescription +
+                     xunFeiApiConfig.wordLimit
           },
           {
             role: 'user',
@@ -268,7 +267,7 @@ export class XunFeiApiService {
       };
 
       const headers = {
-        Authorization: 'Bearer ihSTyylZRcULsrKSJIdv:owssiFeIVDNTzaUSwuyi', // 替换为真实密码
+        Authorization: 'Bearer ' + xunFeiApiConfig.naturalLanguageApiPassword, // 替换为真实密码
         'Content-Type': 'application/json'
       };
 
@@ -334,11 +333,11 @@ export class XunFeiApiService {
       // return 'okokok';
       // console.log('speech-synthesis-api', text);
       const config = {
-        hostUrl: "wss://tts-api.xfyun.cn/v2/tts",
-        host: "tts-api.xfyun.cn",
-        appid: "da9c4155",
-        apiSecret: "ODc1M2JjNzAxMGU3NDg4OTg5YzBlOTI1",
-        apiKey: "b2c58394f9b57e659c8a47855a364354",
+        hostUrl: xunFeiApiConfig.speechSynthesisHostUrl,
+        host: xunFeiApiConfig.speechSynthesisHost,
+        appid: xunFeiApiConfig.appid,
+        apiSecret: xunFeiApiConfig.apiSecret,
+        apiKey: xunFeiApiConfig.apiKey,
         uri: "/v2/tts",
       };
 
@@ -368,7 +367,7 @@ export class XunFeiApiService {
           business: {
             aue: "raw",
             auf: "audio/L16;rate=16000",
-            vcn: "x4_lingyuyan",
+            vcn: xunFeiApiConfig.speechSynthesisVcn,
             tte: "UTF8",
           },
           data: {
