@@ -100,8 +100,8 @@ export class IndexComponent implements AfterViewChecked, OnInit {
           // console.log('speechSynthesisApi result', base64);
           const audio = new Audio(`data:audio/wav;base64,${base64}`);
           console.log('audio play');
-          audio.play();
           this.isAudioPlaying = true;
+          audio.play();
           audio.addEventListener('ended', () => {
             console.log('播放完成');
             subscription.unsubscribe();
@@ -138,6 +138,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     this.mode = mode;
     if (mode === 'text') {
       this.stopMic();
+      this.inConversation = false;
     } else if (mode === 'audio') {
       // this.startMic();
     }

@@ -149,9 +149,9 @@ export class XunFeiApiService {
                 },
                 //填充business
                 business: {
-                  language: "zh_cn",
+                  language: xunFeiApiConfig.speechRecognitionLanguage,
                   domain: "iat",
-                  accent: "mandarin",
+                  accent: xunFeiApiConfig.speechRecognitionAccent,
                   dwa: "wpgs" // 可选参数，动态修正
                 },
                 //填充data

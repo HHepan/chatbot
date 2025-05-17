@@ -6,6 +6,10 @@ export const xunFeiApiConfig ={
   speechRecognitionHostUrl: "wss://iat-api.xfyun.cn/v2/iat",
   // 语音识别 webSocket 请求 host
   speechRecognitionHost: "iat-api.xfyun.cn",
+  // 语音识别 语言
+  speechRecognitionLanguage: "zh_cn",
+  // 语音识别 方言
+  speechRecognitionAccent: "mandarin",
   // 自然语言处理 http 请求地址
   naturalLanguageUrl: "https://spark-api-open.xf-yun.com/v1/chat/completions",
   // 自然语言处理 ApiPassword

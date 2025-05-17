@@ -65,14 +65,6 @@
   color: #333;
 }
 
-//.input-group div {
-//  border: 1px solid #56C596; /* 边框颜色与按钮相匹配 */
-//  background-color: #ffffff; /* 白色背景 */
-//  border-radius: 25px; /* 圆角输入框 */
-//  padding-left: 15px;
-//  color: #333;
-//}
-
 /* 对textarea进行特殊设置 */
 textarea.form-control {
   min-height: 40px; /* 设置最小高度 */
@@ -91,15 +83,58 @@ canvas.form-control {
   padding: 10px; /* 内边距 */
 }
 
+.input-group button.default {
+  background-color: #8C8C8C; // 深一点的灰色
+  border: none;
+  color: #fff;
+  border-radius: 25px;
+  &:hover {
+    background-color: #737373;
+  }
+}
+
+.input-group button.update {
+  background-color: #1E90FF; // 清亮的天蓝色
+  border: none;
+  color: #fff;
+  border-radius: 25px;
+  &:hover {
+    background-color: #187bcd; // 深一点的亮蓝（亮度保留）
+  }
+}
+
+.input-group button.delete {
+  background-color: #D9534F; // 略深的红色（偏番茄）
+  border: none;
+  color: #fff;
+  border-radius: 25px;
+  &:hover {
+    background-color: #C9302C;
+  }
+}
+
+.input-group button.add {
+  background-color: #56C596; // 保留你提供的绿色
+  border: none;
+  color: #fff;
+  border-radius: 25px;
+  &:hover {
+    background-color: #4CAF50;
+  }
+}
+
+
+
+
 /* 发送按钮的圆角效果 */
-.input-group button {
+.input-group button.btn {
   background-color: #56C596; /* 清新绿色按钮 */
   border: none;
   color: #fff;
   border-radius: 25px;
 }
 
-.input-group button:hover {
+.input-group button.btn:hover {
   background-color: #4CAF50; /* 按钮悬停时的颜色（稍深绿色） */
   cursor: pointer;
 }
