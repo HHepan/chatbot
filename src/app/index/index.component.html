@@ -13,9 +13,9 @@
           <option value="3">教育科普</option>
         </select>
         <button class="default">设为默认</button>
-        <button class="update"><i class="fa-regular fa-pen-to-square"></i></button>
+        <button class="edit" routerLink="edit"><i class="fa-regular fa-pen-to-square"></i></button>
         <button class="delete"><i class="fa-solid fa-trash"></i></button>
-        <button class="add">&nbsp;<i class="fa-solid fa-square-plus"></i>&nbsp;</button>
+        <button class="add" routerLink="add">&nbsp;<i class="fa-solid fa-square-plus"></i>&nbsp;</button>
       </div>
 
 
@@ -86,3 +86,4 @@
     </div>
   </div>
 </div>
+<router-outlet></router-outlet>

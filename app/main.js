@@ -10,6 +10,7 @@ const events_center_1 = require("./events.center");
 const main_service_1 = require("./main.service");
 const message_repository_1 = require("./repository/message.repository");
 const xunfei_api_service_1 = require("./services/xunfei-api.service");
+const setting_repository_1 = require("./repository/setting.repository");
 let win = null;
 const eventsCenter = new events_center_1.EventsCenter();
 const args = process.argv.slice(1), serve = args.some(val => val === '--serve');
@@ -19,6 +20,7 @@ function createWindow() {
         console.log(data_source_1.AppDataSource.isInitialized);
         // 实例化加载事件
         new message_repository_1.MessageRepository(eventsCenter);
+        new setting_repository_1.SettingRepository(eventsCenter);
         // 实例化讯飞api服务
         new xunfei_api_service_1.XunFeiApiService(eventsCenter);
         // 监听所有事件
