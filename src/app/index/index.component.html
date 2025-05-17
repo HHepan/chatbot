@@ -1,6 +1,26 @@
 <div class="card shadow-lg chat-card">
   <div class="card-header text-white">
-    <h5>ChatBot</h5>
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">ChatBot</h5>
+
+
+
+      <div class="input-group" style="width: 400px;">
+        <label class="input-group-text" for="inputGroupSelect01">角色设定</label>
+        <select class="form-select" id="inputGroupSelect01">
+          <option value="1" selected>情感陪伴</option>
+          <option value="2">知识问答</option>
+          <option value="3">教育科普</option>
+        </select>
+        <button class="default">设为默认</button>
+        <button class="update"><i class="fa-regular fa-pen-to-square"></i></button>
+        <button class="delete"><i class="fa-solid fa-trash"></i></button>
+        <button class="add">&nbsp;<i class="fa-solid fa-square-plus"></i>&nbsp;</button>
+      </div>
+
+
+
+    </div>
   </div>
   <div class="card-body chat-body" #chatBody>
     <div *ngFor="let msg of messages" class="d-flex mb-3">
