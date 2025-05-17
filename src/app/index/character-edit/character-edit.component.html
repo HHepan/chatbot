@@ -1,0 +1,42 @@
+<nav aria-label="breadcrumb" class="rounded-1  py-2" style="background-color: #cfe2ff">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item active" style="font-size: large">&nbsp;&nbsp;编辑角色</li>
+  </ol>
+</nav>
+
+<form style="padding-bottom: 1rem;" class="mt-3" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+  <div class="form-group row text-right">
+    <label class="col-4 col-form-label"><code>*</code>名称</label>
+    <div class="col-4">
+      <input type="text" class="form-control" formControlName="name">
+    </div>
+  </div>
+  <div class="form-group row text-right mt-2">
+    <label class="col-4 col-form-label"><code>*</code>角色设定</label>
+    <div class="col-4">
+      <textarea style="height: 200px; resize: none;" type="text" class="form-control" formControlName="character_setting" placeholder="此处需要填写的是大模型的角色属性，示例:你是一个充满智慧的好知己，随时准备提供情感上的支持。"></textarea>
+    </div>
+  </div>
+  <div class="form-group row text-right mt-2">
+    <label class="col-4 col-form-label"><code>*</code>角色描述</label>
+    <div class="col-4">
+      <textarea style="height: 200px; resize: none;" type="text" class="form-control" formControlName="description" placeholder="在此填写需要模型完成的任务目标以及需求要求，示例:我找你聊天时，你能通过平和普通的语言提供支持，可以偶尔带点哲理和智慧但不要太多，让我感到轻松、舒适。"></textarea>
+    </div>
+  </div>
+  <div class="form-group row text-right mt-2">
+    <label class="col-4 col-form-label"><code>*</code>单句回复最大字数</label>
+    <div class="col-4">
+      <input type="number" class="form-control" formControlName="max_text_number">
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-9">
+      &nbsp;
+    </div>
+    <div class="col-3 text-center">
+      <button type="button" class="btn btn-outline-secondary" (click)="onClose()">取消</button>&nbsp;
+      <button type="submit" class="btn btn-outline-primary" [disabled]="formGroup.invalid">保存</button>
+    </div>
+  </div>
+</form>

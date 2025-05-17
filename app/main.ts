@@ -7,6 +7,7 @@ import {EventsCenter} from "./events.center";
 import {MainService} from "./main.service";
 import {MessageRepository} from "./repository/message.repository";
 import {XunFeiApiService} from "./services/xunfei-api.service";
+import {SettingRepository} from "./repository/setting.repository";
 let win: BrowserWindow | null = null;
 const eventsCenter = new EventsCenter();
 const args = process.argv.slice(1),
@@ -18,6 +19,7 @@ function createWindow(): BrowserWindow {
     console.log(AppDataSource.isInitialized);
     // 实例化加载事件
     new MessageRepository(eventsCenter);
+    new SettingRepository(eventsCenter);
 
     // 实例化讯飞api服务
     new XunFeiApiService(eventsCenter);
