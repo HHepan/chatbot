@@ -50,5 +50,24 @@ export class SettingRepository {
         }
       }
     });
+
+    this.addEvent('setDefaultById', async (event: any, itemId: number) => {
+      // 1. 把所有项的 default 字段设为 false
+      await settingRepo
+        .createQueryBuilder()
+        .update(Setting)
+        .set({ default: 0 })
+        .execute();
+
+      // 2. 把目标项的 default 字段设为 true
+      await settingRepo
+        .createQueryBuilder()
+        .update(Setting)
+        .set({ default: 1 })
+        .where('id = :id', { id: itemId })
+        .execute();
+
+      return settingRepo.find();
+    });
   }
 }

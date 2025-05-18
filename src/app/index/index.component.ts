@@ -40,6 +40,8 @@ export class IndexComponent implements AfterViewChecked, OnInit {
   lastSpeechRecognitionTexts:string[] = [];
   isAudioPlaying = false;
 
+  isDefaultSetting = true;
+
   constructor(private xunFeiApiService: XunFeiApiService,
               private datePipe: DatePipe,
               private indexService: IndexService,
@@ -68,8 +70,35 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     this.settingService.getAll().subscribe(allSetting => {
       allSetting.forEach((setting: Setting) => {
         this.settings.push(setting);
+        if (setting.default === 1) {
+          this.currentSettingId = setting.id!.toString();
+        }
       });
       // console.log('index c settings', this.settings);
+      if (this.settings.length === 0) {
+        this.addDefaultSetting();
+      }
+    });
+  }
+
+  addDefaultSetting() {
+    const setting = new Setting();
+    setting.name = "情感陪伴（内置）";
+    setting.character_setting = "你是一个充满智慧的好知己，随时准备提供情感上的支持。" +
+      "无论是生活中的琐事还是工作上的烦恼，你总能以一种平和、自然的方式给予安慰。" +
+      "你话语间带有温暖与关怀，偶尔会加上一些幽默，时不时让人会心一笑。" +
+      "你擅长倾听，能用简单但深刻的话语帮助他人理清思绪，找到前进的力量。\n";
+    setting.description = "当我找你聊天时，你能通过平和普通的语言提供支持，可以偶尔带点哲理和智慧但不要太多，让我感到轻松、舒适。\n" +
+      "你的回答不需要太过华丽，保持自然流畅，温暖且亲切。偶尔加入一些幽默或轻松的元素但并不需要太多，让我在需要时感到放松。\n" +
+      "你的回答不需要有过多反问形式的关心，这样会显得太刻意。\n" +
+      "你的话语要传达理解和支持，能够让人感觉到安慰和陪伴，而不是做过多的解释或过度分析。\n" +
+      "你的回复中不需要角色扮演和虚拟动作。\n";
+    setting.max_text_number = 50;
+    setting.default = 1;
+
+    this.settingService.add(setting).subscribe(result => {
+      console.log('default Character Add success', result);
+      this.getAllSetting();
     });
   }
 
@@ -82,18 +111,52 @@ export class IndexComponent implements AfterViewChecked, OnInit {
   }
 
   deleteSetting(currentSettingId: string) {
+    if (currentSettingId === this.settings[0].id?.toString()) {
+      this.commonService.error(() => {}, "内置角色设定不可删除")
+    } else {
+      let deleteSetting: Setting;
+      this.settings.forEach(setting => {
+        if (setting.id?.toString() === currentSettingId) {
+          deleteSetting = setting;
+          this.commonService.confirm((confirm: any) => {
+            if (confirm) {
+              this.settingService.delete(deleteSetting).subscribe(() => {
+                this.getAllSetting();
+                this.commonService.success();
+              });
+            }
+          }, '确认删除角色"' + deleteSetting.name + '"?');
+        }
+      });
+    }
+  }
+
+  changeSetting(currentSettingId: string) {
+    this.settings.forEach(setting => {
+      if (setting.id?.toString() === currentSettingId) {
+        if (setting.default === 1) {
+          this.isDefaultSetting = true;
+        } else {
+          this.isDefaultSetting = false;
+        }
+      }
+    });
+  }
+
+  setCurrentSettingToBeDefault(currentSettingId: string) {
     let deleteSetting: Setting;
     this.settings.forEach(setting => {
       if (setting.id?.toString() === currentSettingId) {
         deleteSetting = setting;
         this.commonService.confirm((confirm: any) => {
           if (confirm) {
-            this.settingService.delete(deleteSetting).subscribe(() => {
+            this.settingService.setDefaultById(Number(currentSettingId)).subscribe(settings => {
               this.getAllSetting();
+              this.isDefaultSetting = true;
               this.commonService.success();
             });
           }
-        }, '确认删除角色' + deleteSetting.name + '?');
+        }, '确认将角色"' + deleteSetting.name + '"设为默认?');
       }
     });
   }

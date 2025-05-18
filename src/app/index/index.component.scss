@@ -93,6 +93,17 @@ canvas.form-control {
   }
 }
 
+// 当不是默认时，橘色按钮
+.input-group button.default.not-default {
+  background-color: coral; // 橘色
+  cursor: pointer;
+
+  &:hover {
+    background-color: #e67348; // 加深的 coral
+    color: #FFEFD5;
+  }
+}
+
 .input-group button.edit {
   background-color: #1E90FF; // 清亮的天蓝色
   border: none;

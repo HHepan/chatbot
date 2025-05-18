@@ -31,6 +31,11 @@ export class SettingService {
       .pipe(catchError((error: any) => throwError(error.json)));
   }
 
+  setDefaultById(settingId: number) {
+    return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'setDefaultById', settingId))
+      .pipe(catchError((error: any) => throwError(error.json)));
+  }
+
   update(newSetting: Setting) {
     return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'update', newSetting))
       .pipe(catchError((error: any) => throwError(error.json)));
