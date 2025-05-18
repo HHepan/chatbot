@@ -19,7 +19,7 @@ const routes: Routes = [
         }
       },
       {
-        path: 'edit',
+        path: 'edit/:id',
         component: DialogEntryComponent,
         data: {
           component: CharacterEditComponent

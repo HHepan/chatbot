@@ -7,14 +7,12 @@
 
       <div class="input-group" style="width: 400px;">
         <label class="input-group-text" for="inputGroupSelect01">角色设定</label>
-        <select class="form-select" id="inputGroupSelect01">
-          <option value="1" selected>情感陪伴</option>
-          <option value="2">知识问答</option>
-          <option value="3">教育科普</option>
+        <select class="form-select" id="inputGroupSelect01" [(ngModel)]="currentSettingId">
+          <option *ngFor="let setting of settings" value="{{ setting.id }}">{{ setting.name }}</option>
         </select>
         <button class="default">设为默认</button>
-        <button class="edit" routerLink="edit"><i class="fa-regular fa-pen-to-square"></i></button>
-        <button class="delete"><i class="fa-solid fa-trash"></i></button>
+        <button class="edit" routerLink="edit/{{ currentSettingId }}"><i class="fa-regular fa-pen-to-square"></i></button>
+        <button class="delete" (click)="deleteSetting(currentSettingId)"><i class="fa-solid fa-trash"></i></button>
         <button class="add" routerLink="add">&nbsp;<i class="fa-solid fa-square-plus"></i>&nbsp;</button>
       </div>
 

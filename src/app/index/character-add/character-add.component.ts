@@ -3,6 +3,7 @@ import {CommonService} from "../../../services/common.service";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {Setting} from "../../../../app/entity/setting";
 import {SettingService} from "../../../services/setting.service";
+import {IndexSubjectService} from "../../../services/subjects/index-subject.service";
 
 @Component({
   selector: 'app-character-add',
@@ -23,7 +24,8 @@ export class CharacterAddComponent {
     max_text_number: 'max_text_number'
   };
   constructor(private commonService: CommonService,
-              private settingService: SettingService) {
+              private settingService: SettingService,
+              private indexSubjectService: IndexSubjectService) {
   }
 
   onClose() {
@@ -43,6 +45,7 @@ export class CharacterAddComponent {
       console.log('Character Add success', result);
       this.onClose();
       this.commonService.success();
+      this.indexSubjectService.addSettingFinish();
     });
   }
 }
