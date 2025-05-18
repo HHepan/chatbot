@@ -5,12 +5,12 @@
 
 
 
-      <div class="input-group" style="width: 400px;">
+      <div class="input-group" style="width: 450px;">
         <label class="input-group-text" for="inputGroupSelect01">角色设定</label>
-        <select class="form-select" id="inputGroupSelect01" [(ngModel)]="currentSettingId">
-          <option *ngFor="let setting of settings" value="{{ setting.id }}">{{ setting.name }}</option>
+        <select class="form-select" id="inputGroupSelect01" [(ngModel)]="currentSettingId" (change)="changeSetting(currentSettingId)">
+          <option [selected]="setting.default" *ngFor="let setting of settings" value="{{ setting.id }}">{{ setting.name }}</option>
         </select>
-        <button class="default">设为默认</button>
+        <button [ngClass]="{ 'not-default': !isDefaultSetting }" class="default" (click)="setCurrentSettingToBeDefault(currentSettingId)" [disabled]="isDefaultSetting">{{ isDefaultSetting ? "已为默认" : "设为默认" }}</button>
         <button class="edit" routerLink="edit/{{ currentSettingId }}"><i class="fa-regular fa-pen-to-square"></i></button>
         <button class="delete" (click)="deleteSetting(currentSettingId)"><i class="fa-solid fa-trash"></i></button>
         <button class="add" routerLink="add">&nbsp;<i class="fa-solid fa-square-plus"></i>&nbsp;</button>

@@ -26,6 +26,9 @@ export class CharacterEditComponent implements OnInit{
   };
   settingId: number | undefined;
   currentSetting: Setting | undefined;
+  settings: Setting[] = [];
+  isInternal = false;
+
   constructor(private commonService:CommonService,
               private activeRoute: ActivatedRoute,
               private settingService: SettingService,
@@ -34,10 +37,22 @@ export class CharacterEditComponent implements OnInit{
 
   ngOnInit(): void {
     this.settingId = this.activeRoute.snapshot.params['id'];
-    console.log('CharacterEditComponent settingId', this.settingId);
+    this.getAllSetting();
     if (this.settingId !== undefined) {
       this.getCurrentSetting(this.settingId);
     }
+  }
+
+  getAllSetting() {
+    this.settings = [];
+    this.settingService.getAll().subscribe(allSetting => {
+      allSetting.forEach((setting: Setting) => {
+        this.settings.push(setting);
+      });
+      if (this.settingId === this.settings[0].id?.toString()) {
+        this.isInternal = true;
+      }
+    });
   }
 
   private getCurrentSetting(settingId: number) {
