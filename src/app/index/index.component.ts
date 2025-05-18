@@ -17,6 +17,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
   @ViewChild('chatBody') private chatBody: any;
   messageContent: string = '';
   currentSettingId: string = '';
+  currentSetting: Setting | undefined;
   messages: Message[] = [];
   settings: Setting[] = [];
   mode: 'text' | 'audio' = 'text'; // Default to 'text' mode
@@ -54,7 +55,6 @@ export class IndexComponent implements AfterViewChecked, OnInit {
 
   ngOnInit(): void {
     this.messages = [];
-    this.getAllMessage();
     this.getAllSetting();
     const subject = this.indexSubjectService.getIndexSubject();
     subject.subscribe(res => {
@@ -72,12 +72,22 @@ export class IndexComponent implements AfterViewChecked, OnInit {
         this.settings.push(setting);
         if (setting.default === 1) {
           this.currentSettingId = setting.id!.toString();
+          console.log('before getAllMessageByCurrentSettingId this.currentSettingId', this.currentSettingId);
+          this.getAllMessageByCurrentSettingId();
+          this.getCurrentSetting(this.currentSettingId);
         }
       });
       // console.log('index c settings', this.settings);
       if (this.settings.length === 0) {
         this.addDefaultSetting();
       }
+    });
+  }
+
+  getCurrentSetting(currentSettingId: string) {
+    this.settingService.getById(Number(currentSettingId)).subscribe(result => {
+      this.currentSetting = result;
+      console.log('getCurrentSetting this.currentSetting', this.currentSetting);
     });
   }
 
@@ -97,13 +107,14 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     setting.default = 1;
 
     this.settingService.add(setting).subscribe(result => {
-      console.log('default Character Add success', result);
       this.getAllSetting();
     });
   }
 
-  getAllMessage() {
-    this.indexService.getAll().subscribe(allMessages => {
+  getAllMessageByCurrentSettingId() {
+    this.messages = [];
+    this.indexService.getAllByCurrentSettingId(Number(this.currentSettingId)).subscribe(allMessages => {
+      console.log(allMessages);
       allMessages.forEach((message: Message) => {
         this.messages.push(message);
       });
@@ -132,6 +143,9 @@ export class IndexComponent implements AfterViewChecked, OnInit {
   }
 
   changeSetting(currentSettingId: string) {
+    this.currentSettingId = currentSettingId;
+    this.getAllMessageByCurrentSettingId();
+    this.getCurrentSetting(currentSettingId);
     this.settings.forEach(setting => {
       if (setting.id?.toString() === currentSettingId) {
         if (setting.default === 1) {
@@ -195,6 +209,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     message.content = messageContent;
     message.time = this.getFormattedTime();
     message.role = role;
+    message.setting = this.currentSetting;
 
     this.indexService.add(message).subscribe(result => {
       const newestMessage = result[result.length - 1];

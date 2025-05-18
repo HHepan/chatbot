@@ -11,7 +11,6 @@ export class SettingService {
   }
 
   add(setting: Setting) {
-    console.log('SettingService add', setting);
     return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'add', setting))
       .pipe(catchError((error: any) => throwError(error.json)));
   }

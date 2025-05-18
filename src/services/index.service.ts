@@ -15,8 +15,8 @@ export class IndexService {
       .pipe(catchError((error: any) => throwError(error.json)));
   }
 
-  getAll() {
-    return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'getAll'))
+    getAllByCurrentSettingId(currentSettingId: number) {
+    return from(this._electronService.ipcRenderer.invoke(this.baseUrl + 'getAll', currentSettingId))
       .pipe(catchError((error: any) => throwError(error.json)));
   }
 

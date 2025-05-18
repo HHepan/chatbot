@@ -21,15 +21,15 @@ export class MessageRepository {
       return messageRepo.find();
     });
 
-    this.addEvent('getAll', (event, searchName: string) => {
-      if (searchName === undefined) {
+    this.addEvent('getAll', (event, currentSettingId: number) => {
+      if (currentSettingId === undefined) {
         return messageRepo.find();
       } else {
         return messageRepo.createQueryBuilder("item")
-          .where("name LIKE :param")
+          .where("settingId = :param")
           .setParameters({
-            param: '%' + searchName + '%'
-          }).orderBy("id", "DESC").getMany();
+            param: currentSettingId
+          }).orderBy("id", "ASC").getMany();
       }
     });
 
