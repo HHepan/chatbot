@@ -9,6 +9,7 @@ import { CharacterAddComponent } from './character-add/character-add.component';
 import {DialogEntryModule} from "../common/dialog-entry/dialog-entry.module";
 import { CharacterEditComponent } from './character-edit/character-edit.component';
 import {SettingService} from "../../services/setting.service";
+import {IndexSubjectService} from "../../services/subjects/index-subject.service";
 
 
 
@@ -25,6 +26,6 @@ import {SettingService} from "../../services/setting.service";
     DialogEntryModule,
     ReactiveFormsModule,
   ],
-  providers: [XunFeiApiService, IndexService, SettingService]
+  providers: [XunFeiApiService, IndexService, SettingService, IndexSubjectService]
 })
 export class IndexModule { }

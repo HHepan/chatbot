@@ -3,6 +3,10 @@ import {XunFeiApiService} from "../../services/xunfei-api.service";
 import {Message} from "../../../app/entity/message";
 import {DatePipe} from "@angular/common";
 import {IndexService} from "../../services/index.service";
+import {SettingService} from "../../services/setting.service";
+import {Setting} from "../../../app/entity/setting";
+import {IndexSubjectService} from "../../services/subjects/index-subject.service";
+import {CommonService} from "../../services/common.service";
 
 @Component({
   selector: 'app-index',
@@ -12,7 +16,9 @@ import {IndexService} from "../../services/index.service";
 export class IndexComponent implements AfterViewChecked, OnInit {
   @ViewChild('chatBody') private chatBody: any;
   messageContent: string = '';
+  currentSettingId: string = '';
   messages: Message[] = [];
+  settings: Setting[] = [];
   mode: 'text' | 'audio' = 'text'; // Default to 'text' mode
   inConversation = false;
   stream: MediaStream | null = null;
@@ -38,12 +44,33 @@ export class IndexComponent implements AfterViewChecked, OnInit {
               private datePipe: DatePipe,
               private indexService: IndexService,
               private ngZone: NgZone,
-              private cdr: ChangeDetectorRef) {
+              private cdr: ChangeDetectorRef,
+              private settingService: SettingService,
+              private indexSubjectService: IndexSubjectService,
+              private commonService: CommonService) {
   }
 
   ngOnInit(): void {
     this.messages = [];
     this.getAllMessage();
+    this.getAllSetting();
+    const subject = this.indexSubjectService.getIndexSubject();
+    subject.subscribe(res => {
+      const keys = this.indexSubjectService.getEventKeys();
+      if (res === keys.addSettingFinish) {
+        this.getAllSetting();
+      }
+    });
+  }
+
+  getAllSetting() {
+    this.settings = [];
+    this.settingService.getAll().subscribe(allSetting => {
+      allSetting.forEach((setting: Setting) => {
+        this.settings.push(setting);
+      });
+      // console.log('index c settings', this.settings);
+    });
   }
 
   getAllMessage() {
@@ -51,6 +78,23 @@ export class IndexComponent implements AfterViewChecked, OnInit {
       allMessages.forEach((message: Message) => {
         this.messages.push(message);
       });
+    });
+  }
+
+  deleteSetting(currentSettingId: string) {
+    let deleteSetting: Setting;
+    this.settings.forEach(setting => {
+      if (setting.id?.toString() === currentSettingId) {
+        deleteSetting = setting;
+        this.commonService.confirm((confirm: any) => {
+          if (confirm) {
+            this.settingService.delete(deleteSetting).subscribe(() => {
+              this.getAllSetting();
+              this.commonService.success();
+            });
+          }
+        }, '确认删除角色' + deleteSetting.name + '?');
+      }
     });
   }
 

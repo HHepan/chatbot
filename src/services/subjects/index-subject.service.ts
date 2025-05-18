@@ -5,7 +5,7 @@ import {Subject} from "rxjs";
 export class IndexSubjectService {
   indexSubject = new Subject();
   eventKeys = {
-    addFinish: 'addFinish',
+    addSettingFinish: 'addSettingFinish',
   }
 
   getIndexSubject() {
@@ -16,7 +16,7 @@ export class IndexSubjectService {
     return this.eventKeys;
   }
 
-  addFinish() {
-    this.indexSubject.next(this.eventKeys.addFinish);
+  addSettingFinish() {
+    this.indexSubject.next(this.eventKeys.addSettingFinish);
   }
 }
