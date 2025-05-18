@@ -40,9 +40,9 @@ export class CharacterAddComponent {
     setting.max_text_number = this.formGroup.get(this.key.max_text_number)?.value;
     setting.default = 0;
 
-    console.log('add setting', setting);
+    // console.log('add setting', setting);
     this.settingService.add(setting).subscribe(result => {
-      console.log('Character Add success', result);
+      // console.log('Character Add success', result);
       this.onClose();
       this.commonService.success();
       this.indexSubjectService.addSettingFinish();

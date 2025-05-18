@@ -1,4 +1,5 @@
-import {Entity, PrimaryGeneratedColumn, Column, BaseEntity} from 'typeorm';
+import {Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany} from 'typeorm';
+import {Message} from "./message";
 
 // 角色设定
 @Entity()
@@ -25,4 +26,8 @@ export class Setting {
   // 是否默认 0: 不是默认；1：是默认
   @Column({ type: 'int' })
   default: number | undefined;
+
+  // 一对多：一个 Setting 对应多个 Message
+  @OneToMany(() => Message, message => message.setting)
+  messages: Message[] | undefined;
 }
