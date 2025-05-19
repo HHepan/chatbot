@@ -4,6 +4,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {spawn} from "child_process";
 import {xunFeiApiConfig} from "../xunfei-api.config";
+import {AppDataSource} from "../data-source";
+import {Setting} from "../entity/setting";
 const ffmpegPath = require('ffmpeg-static');
 const CryptoJS = require('crypto-js');
 const WebSocket = require('ws');
@@ -241,89 +243,98 @@ export class XunFeiApiService {
     /**
      * 调用自然语言处理 api
      * */
-    this.addEvent('natural-language-api', async (event, message: string) => {
-      // console.log('natural-language-api', message);
+    this.addEvent('natural-language-api', async (event, message: string, currentSettingId: string) => {
 
-      const url = xunFeiApiConfig.naturalLanguageUrl;
+      const settingRepo = AppDataSource.getRepository(Setting);
 
-      const data = {
-        max_tokens: 100,
-        top_k: 6,
-        temperature: 1,
-        model: 'generalv3.5',
-        messages: [
-          {
-            role: "system",
-            content: xunFeiApiConfig.naturalLanguageCharacterSetting +
-                     xunFeiApiConfig.naturalLanguageInstructionDescription +
-                     xunFeiApiConfig.wordLimit
-          },
-          {
-            role: 'user',
-            content: message
-          }
-        ],
-        stream: true
-      };
+      const currentSettingPromise = settingRepo.findOne({where: {id: Number(currentSettingId)}});
 
-      const headers = {
-        Authorization: 'Bearer ' + xunFeiApiConfig.naturalLanguageApiPassword, // 替换为真实密码
-        'Content-Type': 'application/json'
-      };
+      currentSettingPromise.then(async currentSetting => {
+        const url = xunFeiApiConfig.naturalLanguageUrl;
 
-      try {
-        const response = await axios.post(url, data, {
-          headers: headers,
-          responseType: 'stream'  // 关键：使用 stream 响应
-        });
+        const characterSetting = currentSetting?.character_setting ? currentSetting?.character_setting : xunFeiApiConfig.naturalLanguageCharacterSetting;
+        const description = currentSetting?.description ? currentSetting?.character_setting : xunFeiApiConfig.naturalLanguageInstructionDescription;
+        const wordLimit = currentSetting?.max_text_number ? currentSetting?.character_setting?.toString() : xunFeiApiConfig.naturalLanguageInstructionDescription;
 
-        response.data.setEncoding('utf8');
-
-        let buffer = '';
-
-        response.data.on('data', (chunk: string) => {
-          buffer += chunk;
-
-          const lines = buffer.split('\n');
-          buffer = lines.pop()!;
-
-          for (let line of lines) {
-            line = line.trim();
-            if (!line) continue;
-
-            if (line === 'data: [DONE]') {
-              // console.log('Data transfer completed');
-              event.sender.send('natural-language-result', '[DONE]');
-              return;
+        const data = {
+          max_tokens: 100,
+          top_k: 6,
+          temperature: 1,
+          model: 'generalv3.5',
+          messages: [
+            {
+              role: "system",
+              content: characterSetting +
+                description +
+                "回复字数请限制在" + wordLimit + "字以内。"
+            },
+            {
+              role: 'user',
+              content: message
             }
+          ],
+          stream: true
+        };
 
-            if (line.startsWith('data:')) {
-              const jsonStr = line.slice(5).trim();  // 去掉 'data: '
-              try {
-                const parsed = JSON.parse(jsonStr);
-                const content = parsed.choices?.[0]?.delta?.content;
-                if (content) {
-                  // console.log(content);
-                  event.sender.send('natural-language-result', content);
+        const headers = {
+          Authorization: 'Bearer ' + xunFeiApiConfig.naturalLanguageApiPassword, // 替换为真实密码
+          'Content-Type': 'application/json'
+        };
+
+        try {
+          const response = await axios.post(url, data, {
+            headers: headers,
+            responseType: 'stream'  // 关键：使用 stream 响应
+          });
+
+          response.data.setEncoding('utf8');
+
+          let buffer = '';
+
+          response.data.on('data', (chunk: string) => {
+            buffer += chunk;
+
+            const lines = buffer.split('\n');
+            buffer = lines.pop()!;
+
+            for (let line of lines) {
+              line = line.trim();
+              if (!line) continue;
+
+              if (line === 'data: [DONE]') {
+                // console.log('Data transfer completed');
+                event.sender.send('natural-language-result', '[DONE]');
+                return;
+              }
+
+              if (line.startsWith('data:')) {
+                const jsonStr = line.slice(5).trim();  // 去掉 'data: '
+                try {
+                  const parsed = JSON.parse(jsonStr);
+                  const content = parsed.choices?.[0]?.delta?.content;
+                  if (content) {
+                    // console.log(content);
+                    event.sender.send('natural-language-result', content);
+                  }
+                } catch (e) {
+                  console.error('JSON parse error:', e);
                 }
-              } catch (e) {
-                console.error('JSON parse error:', e);
               }
             }
-          }
-        });
+          });
 
-        response.data.on('end', () => {
-          // console.log('natural-language-api response end');
-        });
+          response.data.on('end', () => {
+            // console.log('natural-language-api response end');
+          });
 
-        response.data.on('error', (err: { message: any; }) => {
-          console.error('Streaming response error：', err);
-        });
+          response.data.on('error', (err: { message: any; }) => {
+            console.error('Streaming response error：', err);
+          });
 
-      } catch (err) {
-        console.error('Request error:', err);
-      }
+        } catch (err) {
+          console.error('Request error:', err);
+        }
+      });
     });
 
     /**
