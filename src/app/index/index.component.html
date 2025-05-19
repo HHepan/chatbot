@@ -2,9 +2,6 @@
   <div class="card-header text-white">
     <div class="d-flex justify-content-between align-items-center">
       <h5 class="mb-0">ChatBot</h5>
-
-
-
       <div class="input-group" style="width: 450px;">
         <label class="input-group-text" for="inputGroupSelect01">角色设定</label>
         <select class="form-select" id="inputGroupSelect01" [(ngModel)]="currentSettingId" (change)="changeSetting(currentSettingId)">
@@ -15,12 +12,9 @@
         <button class="delete" (click)="deleteSetting(currentSettingId)"><i class="fa-solid fa-trash"></i></button>
         <button class="add" routerLink="add">&nbsp;<i class="fa-solid fa-square-plus"></i>&nbsp;</button>
       </div>
-
-
-
     </div>
   </div>
-  <div class="card-body chat-body" #chatBody>
+  <div *ngIf="messages.length > 0" class="card-body chat-body" #chatBody>
     <div *ngFor="let msg of messages" class="d-flex mb-3">
       <div *ngIf="msg.role === '1'" class="ms-auto">
         <label class="text-end w-100 small text-muted mb-1">{{ getViewTime(msg.time) }}</label>
@@ -38,6 +32,13 @@
     <div *ngIf="answerRunning" class="me-auto">
       <div class="bg-light p-2 rounded-3">
         <p>{{ naturalLanguageResult }}</p>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="messages.length === 0" class="card-body chat-body">
+    <div class="nav flex-column justify-content-center text-center text-success" style="height:500px;">
+      <div>
+        <h3 style="color:#cecece;">还没有开启聊天哦，请输入对话内容发起聊天吧！</h3>
       </div>
     </div>
   </div>
