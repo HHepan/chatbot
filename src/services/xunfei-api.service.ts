@@ -1,7 +1,6 @@
 import {Injectable} from "@angular/core";
 import {ElectronService} from "./electron.service";
 import {from, Observable, throwError} from "rxjs";
-import {catchError} from "rxjs/operators";
 
 @Injectable()
 export class XunFeiApiService {
@@ -38,9 +37,9 @@ export class XunFeiApiService {
   /**
    * 调用讯飞 Spark Max 自然语言处理 API，返回 Observable 流式响应
    */
-  naturalLanguageApi(message: string): Observable<string> {
+  naturalLanguageApi(message: string, currentSettingId: string): Observable<string> {
     // 向主进程发送消息
-    this._electronService.ipcRenderer.invoke('natural-language-api', message);
+    this._electronService.ipcRenderer.invoke('natural-language-api', message, currentSettingId);
 
     return new Observable<string>(observer => {
       const listener = (_event: any, data: string) => {
