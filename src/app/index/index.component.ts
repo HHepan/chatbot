@@ -67,12 +67,12 @@ export class IndexComponent implements AfterViewChecked, OnInit {
     });
   }
 
-  getAllSetting() {
+  getAllSetting(afterDelete = false) {
     this.settings = [];
     this.settingService.getAll().subscribe(allSetting => {
       allSetting.forEach((setting: Setting) => {
         this.settings.push(setting);
-        if (setting.default === 1 && this.isInit) {
+        if (setting.default === 1 && (this.isInit  || afterDelete)) {
           this.currentSettingId = setting.id!.toString();
           this.getAllMessageByCurrentSettingId();
           this.getCurrentSetting(this.currentSettingId);
@@ -130,7 +130,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
           this.commonService.confirm((confirm: any) => {
             if (confirm) {
               this.settingService.delete(deleteSetting).subscribe(() => {
-                this.getAllSetting();
+                this.getAllSetting(true);
                 this.commonService.success();
               });
             }

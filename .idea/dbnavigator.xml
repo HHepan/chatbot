@@ -39,9 +39,7 @@
     <last-used-providers />
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files>
-      <object connection-id="cde51f7a-d55b-4a2c-8fac-0a7d18cee074" object-ref="schemas/main/tables/setting" />
-    </open-files>
+    <open-files />
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="55bf6b15-0082-469d-84ad-ba6cbe1888a2" />
@@ -458,7 +456,7 @@
           <object-name-filters />
         </object-filters>
       </connection>
-      <connection id="cde51f7a-d55b-4a2c-8fac-0a7d18cee074" active="true" signed="true">
+      <connection id="cde51f7a-d55b-4a2c-8fac-0a7d18cee074" active="false" signed="true">
         <database>
           <name value="Connection 4" />
           <description value="" />
