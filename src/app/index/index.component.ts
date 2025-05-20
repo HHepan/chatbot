@@ -74,6 +74,7 @@ export class IndexComponent implements AfterViewChecked, OnInit {
         this.settings.push(setting);
         if (setting.default === 1 && (this.isInit  || afterDelete)) {
           this.currentSettingId = setting.id!.toString();
+          this.isDefaultSetting = true;
           this.getAllMessageByCurrentSettingId();
           this.getCurrentSetting(this.currentSettingId);
           this.isInit = !this.isInit;
