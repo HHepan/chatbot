@@ -18,7 +18,7 @@
 
 # 开发与运行
 
-详情请见项目(https://github.com/HHepan/angular-electron-typeorm-better-sqlite3)的 README 描述。其中包括**环境准备**、**如何启动**、**如何打包**、**开发时如何查看数据库**等具体开发细节。
+详情请见项目( https://github.com/HHepan/angular-electron-typeorm-better-sqlite3 )的 README 描述。其中包括**环境准备**、**如何启动**、**如何打包**、**开发时如何查看数据库**等具体开发细节。
 
 # 关于第三方
 该项目的语音识别功能、语音合成功能、自然语言处理功能均依靠对接的科大讯飞 api 实现，具体如下：
