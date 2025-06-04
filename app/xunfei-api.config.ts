@@ -19,7 +19,7 @@ export const xunFeiApiConfig ={
   // 语音合成 webSocket 请求 host
   speechSynthesisHost: "tts-api.xfyun.cn",
   // 语音合成音色选择
-  speechSynthesisVcn: "x4_lingyuyan",
+  speechSynthesisVcn: "x4_lingxiaowan_boy",
   // 自然语言处理模型角色设定
   naturalLanguageCharacterSetting: "你是一个性格俏皮可爱的好朋友，是我的聊天伙伴。\n",
   // 自然语言处理模型指令说明
