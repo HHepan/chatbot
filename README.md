@@ -27,7 +27,7 @@
 
 语音合成：科大讯飞-在线语音合成，文档见 https://www.xfyun.cn/doc/tts/online_tts/API.html 。
 
-自然语言处理：科大讯飞-星火认知大模型-SparkMax，文档见 https://www.xfyun.cn/doc/spark/HTTP%E8%B0%83%E7%94%A8%E6%96%87%E6%A1%A3.html
+自然语言处理：科大讯飞-星火认知大模型-SparkMax，文档见 https://www.xfyun.cn/doc/spark/HTTP%E8%B0%83%E7%94%A8%E6%96%87%E6%A1%A3.html 。
 
 因此，本项目需要先去到讯飞开放平台( https://console.xfyun.cn )，创建应用后申请相关的鉴权信息，具体见下图：
 ![8.png](src%2Fassets%2Fimages%2Freadme%2F8.png)
