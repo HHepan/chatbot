@@ -18,7 +18,7 @@
 
 # 开发与运行
 
-详情请见此项目(https://github.com/HHepan/angular-electron-typeorm-better-sqlite3)的 README 描述。其中包括环境准备、如何启动、如何打包、开发时如何查看数据库等具体开发细节。
+详情请见项目(https://github.com/HHepan/angular-electron-typeorm-better-sqlite3)的 README 描述。其中包括环境准备、如何启动、如何打包、开发时如何查看数据库等具体开发细节。
 
 # 关于第三方
 该项目的语音识别功能、语音合成功能、自然语言处理功能均依靠对接的科大讯飞 api 实现，具体如下：
@@ -29,7 +29,7 @@
 
 自然语言处理：科大讯飞-星火认知大模型-SparkMax，文档见 https://www.xfyun.cn/doc/spark/HTTP%E8%B0%83%E7%94%A8%E6%96%87%E6%A1%A3.html
 
-因此，本项目需要先去到讯飞开放平台(https://console.xfyun.cn)，创建应用后申请相关的鉴权信息，具体见下图：
+因此，本项目需要先去到讯飞开放平台( https://console.xfyun.cn )，创建应用后申请相关的鉴权信息，具体见下图：
 ![8.png](src%2Fassets%2Fimages%2Freadme%2F8.png)
 (该文件位置为chatbot/app/xunfei-api.config.ts)
 
