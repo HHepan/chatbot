@@ -1,7 +1,7 @@
 export const xunFeiApiConfig ={
-  appid: "da9c4155",
-  apiSecret: "ODc1M2JjNzAxMGU3NDg4OTg5YzBlOTI1",
-  apiKey: "b2c58394f9b57e659c8a47855a364354",
+  appid: "",      // 请申请到后填写，详情见readme-关于第三方部分内容。
+  apiSecret: "",  // 请申请到后填写，详情见readme-关于第三方部分内容。
+  apiKey: "",     // 请申请到后填写，详情见readme-关于第三方部分内容。
   // 语音识别 webSocket 请求地址
   speechRecognitionHostUrl: "wss://iat-api.xfyun.cn/v2/iat",
   // 语音识别 webSocket 请求 host
@@ -13,7 +13,7 @@ export const xunFeiApiConfig ={
   // 自然语言处理 http 请求地址
   naturalLanguageUrl: "https://spark-api-open.xf-yun.com/v1/chat/completions",
   // 自然语言处理 ApiPassword
-  naturalLanguageApiPassword: "ihSTyylZRcULsrKSJIdv:owssiFeIVDNTzaUSwuyi",
+  naturalLanguageApiPassword: "", // 请申请到后填写，详情见readme-关于第三方部分内容。
   // 语音合成 webSocket 请求地址
   speechSynthesisHostUrl: "wss://tts-api.xfyun.cn/v2/tts",
   // 语音合成 webSocket 请求 host
